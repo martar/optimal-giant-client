@@ -8,10 +8,19 @@ In order to build the project, you will need brunch.io https://github.com/brunch
 
 ## Getting started
 
-After cloning the repo, enter the project directory for the first time and type 'npm install'
-In order to build the project type: ./build.sh
+After cloning the repo, enter the project directory for the first time and type: 
 
-in order to launch the server type: brunch watch --server
+    npm install
+
+In order to build the project type: 
+
+    ./build.sh
+
+in order to launch the server type:
+
+    brunch watch --server
+
+You're done. To 'see' the effect navigate to your browser to http://localhost:3333
 
 ## What's going on
 
