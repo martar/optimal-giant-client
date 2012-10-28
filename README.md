@@ -12,4 +12,4 @@ After cloning the repo, enter the project direcotry and build the project
 by typing ./build.sh
 
 in order to launch the server type:
-brunch watch
+brunch watch --server
