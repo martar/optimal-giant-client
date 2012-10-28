@@ -15,4 +15,7 @@ in order to launch the server type: brunch watch --server
 
 ## What's going on
 
-So far, on page load, the web worker is started and she computes one step in our model simulation. Return value is prointed to the browser's console
+As for now, the only interesting part of the code is placed in 
+worker/ directory. Anything besides it is a boilerplate.
+
+On page load, the web worker is started and she computes one step in our model simulation. Return value is printed to the browser's console
