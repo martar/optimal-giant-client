@@ -1,7 +1,9 @@
 var numeric = (typeof exports === "undefined")?(function numeric() {}):(exports);
 if(typeof global !== "undefined") { global.numeric = numeric; }
 
-numeric.version = "1.2.3";
+numeric.version = "1.2.3-with-patch";
+// This is a patched version of the lib from my fork: https://github.com/martar/numeric
+// Basicly I Added function dopri_params that adds the possibility to add additional parameters to function passed to dopri solver
 
 // 1. Utility functions
 numeric.bench = function bench (f,interval) {
