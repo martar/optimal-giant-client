@@ -1,4 +1,4 @@
-# OptiomalGialnt client
+# OptimalGiant client
 
 Client side code for in browser computations and visualization
 
@@ -8,8 +8,11 @@ In order to build the project, you will need brunch.io https://github.com/brunch
 
 ## Getting started
 
-After cloning the repo, enter the project direcotry and build the project
-by typing ./build.sh
+After cloning the repo, enter the project directory for the first time and type 'npm install'
+In order to build the project type: ./build.sh
 
-in order to launch the server type:
-brunch watch --server
+in order to launch the server type: brunch watch --server
+
+## What's going on
+
+So far, on page load, the web worker is started and she computes one step in our model simulation. Return value is prointed to the browser's console
