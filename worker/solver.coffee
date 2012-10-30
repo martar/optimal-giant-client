@@ -31,7 +31,18 @@ class Skier
   constructor: (@mi=0.05, @m=60, @C=0.6, @A=0.2) ->
     this.roh = 1.32 # air density
     @k2 = 0.5 * @C * this.roh * @A
-
+    @velocities = [[0,19]]
+    @positions = [[0,0,]]
+    @solver = new Solver()
+  move: (t0, t1) ->
+    result = @solver.solve(t0,t1,@positions[0], @velocities[0], 0.05, this).y
+    [xx, vx, xy, vy] =result[result.length-1]
+    @positions.unshift [xx, xy]
+    @velocities.unshift [vx, vy]
+	
+  getPositions: () ->
+    @positions
+	
 class Solver
   compute_sin_cos_beta = (v0) =>
     v0_length = mag(v0)
@@ -56,7 +67,7 @@ class Solver
     N = sqrt ( square((g*cos(alfa))) + square((f_R)) )
     f = [ vx, vy, f_r*sinus*sign_omega- (skier.mi*N + k1/skier.m*vl + square(skier.k2/skier.m*vl))*cosinus, g*sin(alfa) - f_r*cosinus*sign_omega - (skier.mi*N + k1/skier.m*vl + skier.k2/skier.m*square(vl))*sinus]
     
-  solve : (start=0, end=1, v0=[0,0,0,19], _kappa=0.05, _skier=new Skier()) =>
+  solve : (start=0, end=1, x0=[0,0], v0=[0,19], kappa=0.05, skier=new Skier()) =>
     '''
     Air drag is proportional to the square of velocity
     when the velocity is grater than some boundary value: B.
@@ -67,19 +78,28 @@ class Solver
       skier.k2 = 0
     else
       k1 = 0
-    [_sinus, _cosinus] = compute_sin_cos_beta(v0)
-    params = {kappa: _kappa, skier: _skier, sinus: _sinus, cosinus: _cosinus}
-    lib.numeric.dopri_params(start,end,v0, vectorfield, params)  
+    [sinus, cosinus] = compute_sin_cos_beta(v0)
+    params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus}
+    lib.numeric.dopri_params(start,end,[x0[0], x0[1], v0[0], v0[1]], vectorfield, params)  
 
 root = exports ? this
 root.OptimalGiant = {}
 root.OptimalGiant.solver = new Solver().solve
 	
-# v0 = [0,0,0,19]                                              
-# kappa = 1.0/20                                             
-# start = Date.now()                                         
-# result = new Solver().solve(0,1,v0,kappa, skier=new Skier())                              
-# duration = Date.now() - start  
-# console.log result                           
-                                  
+'''
+start = Date.now()                                                                    
+
+sk = new Skier()
+n = 0
+steep = 0.1
+t0 = 0
+while n < 1000
+  t1 = t0+steep
+  sk.move(t0, t1)
+  t0 = t1
+  n += 1
+
+duration = Date.now() - start
+console.log sk.getPositions().reverse() 
+'''
                                                              

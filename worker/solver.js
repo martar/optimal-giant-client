@@ -2,7 +2,7 @@
 (function() {
   'this is a hack that enables the usage of this script in both: the browser via Web Workers or in Node.js';
 
-  var B, Skier, Solver, alfa, cos, g, k1, lib, mag, pi, root, sign_omega, sin, sqrt, square,
+  var B, Skier, Solver, alfa, cos, duration, g, k1, kappa, lib, mag, ol, pi, result, root, sign_omega, sin, sk, skier, sqrt, square, start, v0, x0,
     _this = this,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -55,11 +55,25 @@
       this.A = A != null ? A : 0.2;
       this.roh = 1.32;
       this.k2 = 0.5 * this.C * this.roh * this.A;
+      this.velocities = [[0, 19]];
+      this.positions = [[0, 0]];
+      this.solver = new Solver();
     }
+
+    Skier.prototype.move = function(t0, t1) {
+      var result, trol;
+      console.log("moving");
+      result = this.solver.solve(0, 1, this.positions[0], this.velocities[0], 0.05, this);
+      return trol = "loll";
+    };
 
     return Skier;
 
   })();
+
+  ol = trol(+"ss");
+
+  result["y"][result.y.length - 1][0] * 100 < 100;
 
   Solver = (function() {
     var compute_sin_cos_beta, vectorfield,
@@ -85,9 +99,10 @@
     };
 
     vectorfield = function(t, v, params) {
-      var N, cosinus, f, f_R, f_r, kappa, sinus, skier, vl, _ref;
+      var N, cosinus, f, f_R, f_r, kappa, sinus, skier, vl, vx, vy, _, _ref;
+      _ = v[0], _ = v[1], vx = v[2], vy = v[3];
       _ref = [params.skier, params.kappa, params.sinus, params.cosinus], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3];
-      vl = mag([v[0], v[1]]);
+      vl = mag([vx, vy]);
       f_R = (square(vl)) * Math.abs(kappa);
       f_r = f_R + sign_omega * g * sin(alfa) * cosinus;
       if (f_r < 0) {
@@ -95,25 +110,28 @@
         f_R = 0;
       }
       N = sqrt(square(g * cos(alfa)) + square(f_R));
-      return f = [f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
+      return f = [vx, vy, f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
     };
 
-    Solver.prototype.solve = function(start, end, v0, _kappa, _skier) {
-      var params, v0_length, _cosinus, _ref, _sinus;
+    Solver.prototype.solve = function(start, end, x0, v0, kappa, skier) {
+      var cosinus, params, sinus, v0_length, _ref;
       if (start == null) {
         start = 0;
       }
       if (end == null) {
         end = 1;
       }
+      if (x0 == null) {
+        x0 = [0, 0];
+      }
       if (v0 == null) {
         v0 = [0, 19];
       }
-      if (_kappa == null) {
-        _kappa = 0.05;
+      if (kappa == null) {
+        kappa = 0.05;
       }
-      if (_skier == null) {
-        _skier = new Skier();
+      if (skier == null) {
+        skier = new Skier();
       }
       'Air drag is proportional to the square of velocity\nwhen the velocity is grater than some boundary value: B.\nk1 and k2 factors control whether we take square or linear proportion';
 
@@ -123,14 +141,14 @@
       } else {
         k1 = 0;
       }
-      _ref = compute_sin_cos_beta(v0), _sinus = _ref[0], _cosinus = _ref[1];
+      _ref = compute_sin_cos_beta(v0), sinus = _ref[0], cosinus = _ref[1];
       params = {
-        kappa: _kappa,
-        skier: _skier,
-        sinus: _sinus,
-        cosinus: _cosinus
+        kappa: kappa,
+        skier: skier,
+        sinus: sinus,
+        cosinus: cosinus
       };
-      return lib.numeric.dopri_params(start, end, v0, vectorfield, params);
+      return lib.numeric.dopri_params(start, end, [x0[0], x0[1], v0[0], v0[1]], vectorfield, params);
     };
 
     return Solver;
@@ -142,5 +160,23 @@
   root.OptimalGiant = {};
 
   root.OptimalGiant.solver = new Solver().solve;
+
+  x0 = [0, 0];
+
+  v0 = [0, 19];
+
+  kappa = 1.0 / 20;
+
+  start = Date.now();
+
+  result = new Solver().solve(0, 1, x0, v0, kappa, skier = new Skier());
+
+  duration = Date.now() - start;
+
+  sk = new Skier();
+
+  sk.move();
+
+  console.log(result.y[result.y.length - 1][0]);
 
 }).call(this);
