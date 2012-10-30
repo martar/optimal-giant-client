@@ -85,9 +85,10 @@
     };
 
     vectorfield = function(t, v, params) {
-      var N, cosinus, f, f_R, f_r, kappa, sinus, skier, vl, _ref;
+      var N, cosinus, f, f_R, f_r, kappa, sinus, skier, vl, vx, vy, _, _ref;
+      _ = v[0], _ = v[1], vx = v[2], vy = v[3];
       _ref = [params.skier, params.kappa, params.sinus, params.cosinus], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3];
-      vl = mag([v[0], v[1]]);
+      vl = mag([vx, vy]);
       f_R = (square(vl)) * Math.abs(kappa);
       f_r = f_R + sign_omega * g * sin(alfa) * cosinus;
       if (f_r < 0) {
@@ -95,7 +96,7 @@
         f_R = 0;
       }
       N = sqrt(square(g * cos(alfa)) + square(f_R));
-      return f = [f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
+      return f = [vx, vy, f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
     };
 
     Solver.prototype.solve = function(start, end, v0, _kappa, _skier) {
@@ -107,7 +108,7 @@
         end = 1;
       }
       if (v0 == null) {
-        v0 = [0, 19];
+        v0 = [0, 0, 0, 19];
       }
       if (_kappa == null) {
         _kappa = 0.05;

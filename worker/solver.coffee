@@ -45,17 +45,18 @@ class Solver
     [sin_beta, cos_beta]
     
   vectorfield = (t,v, params) =>
+    [_, _, vx, vy] = v
     [skier, kappa, sinus, cosinus] = [params.skier, params.kappa, params.sinus, params.cosinus]
-    vl = mag [v[0],v[1]]
+    vl = mag [vx,vy]
     f_R = (square(vl))*Math.abs(kappa)
     f_r = f_R + sign_omega*g*sin(alfa)*cosinus
     if f_r < 0
       f_r = sign_omega*g*sin(alfa)*cosinus
       f_R = 0  
     N = sqrt ( square((g*cos(alfa))) + square((f_R)) )
-    f = [ f_r*sinus*sign_omega- (skier.mi*N + k1/skier.m*vl + square(skier.k2/skier.m*vl))*cosinus, g*sin(alfa) - f_r*cosinus*sign_omega - (skier.mi*N + k1/skier.m*vl + skier.k2/skier.m*square(vl))*sinus]
+    f = [ vx, vy, f_r*sinus*sign_omega- (skier.mi*N + k1/skier.m*vl + square(skier.k2/skier.m*vl))*cosinus, g*sin(alfa) - f_r*cosinus*sign_omega - (skier.mi*N + k1/skier.m*vl + skier.k2/skier.m*square(vl))*sinus]
     
-  solve : (start=0, end=1, v0=[0,19], _kappa=0.05, _skier=new Skier()) =>
+  solve : (start=0, end=1, v0=[0,0,0,19], _kappa=0.05, _skier=new Skier()) =>
     '''
     Air drag is proportional to the square of velocity
     when the velocity is grater than some boundary value: B.
@@ -74,11 +75,11 @@ root = exports ? this
 root.OptimalGiant = {}
 root.OptimalGiant.solver = new Solver().solve
 	
-# v0 = [0,19]                                                
+# v0 = [0,0,0,19]                                              
 # kappa = 1.0/20                                             
 # start = Date.now()                                         
-# result = new Solver().solve(0,1,v0,kappa)                              
+# result = new Solver().solve(0,1,v0,kappa, skier=new Skier())                              
 # duration = Date.now() - start  
-# console.log new Solver().solve()                            
+# console.log result                           
                                   
                                                              
