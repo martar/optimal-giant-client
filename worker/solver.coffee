@@ -28,20 +28,23 @@ class Skier
   C - drag coefficient, typical values (0.4 - 1)
   A - area of the skier exposed to the air
   """
-  constructor: (@mi=0.05, @m=60, @C=0.6, @A=0.2) ->
+  constructor: (@mi=0.05, @m=60, @C=0.6, @A=0.2, @solver=new Solver(), @x0=[0,0], @v0=[0,19]) ->
     this.roh = 1.32 # air density
     @k2 = 0.5 * @C * this.roh * @A
-    @velocities = [[0,19]]
-    @positions = [[0,0,]]
-    @solver = new Solver()
-  move: (t0, t1) ->
-    result = @solver.solve(t0,t1,@positions[0], @velocities[0], 0.05, this).y
+    @velocities = [v0]
+    @positions = [x0]
+	
+  move: (t0, t1, kappa) ->
+    result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, this).y
     [xx, vx, xy, vy] =result[result.length-1]
     @positions.unshift [xx, xy]
     @velocities.unshift [vx, vy]
 	
   getPositions: () ->
     @positions
+	
+  getVelocities: () ->
+    @velocities
 	
 class Solver
   compute_sin_cos_beta = (v0) =>
@@ -84,7 +87,8 @@ class Solver
 
 root = exports ? this
 root.OptimalGiant = {}
-root.OptimalGiant.solver = new Solver().solve
+root.OptimalGiant.Solver = Solver
+root.OptimalGiant.Skier = Skier
 	
 '''
 start = Date.now()                                                                    
@@ -95,7 +99,7 @@ steep = 0.1
 t0 = 0
 while n < 1000
   t1 = t0+steep
-  sk.move(t0, t1)
+  sk.move(t0, t1, 0.05)
   t0 = t1
   n += 1
 

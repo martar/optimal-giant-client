@@ -2,7 +2,7 @@
 (function() {
   'this is a hack that enables the usage of this script in both: the browser via Web Workers or in Node.js';
 
-  var B, Skier, Solver, alfa, cos, duration, g, k1, kappa, lib, mag, ol, pi, result, root, sign_omega, sin, sk, skier, sqrt, square, start, v0, x0,
+  var B, Skier, Solver, alfa, cos, g, k1, lib, mag, pi, root, sign_omega, sin, sqrt, square,
     _this = this,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -61,19 +61,24 @@
     }
 
     Skier.prototype.move = function(t0, t1) {
-      var result, trol;
-      console.log("moving");
-      result = this.solver.solve(0, 1, this.positions[0], this.velocities[0], 0.05, this);
-      return trol = "loll";
+      var result, vx, vy, xx, xy, _ref;
+      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], 0.05, this).y;
+      _ref = result[result.length - 1], xx = _ref[0], vx = _ref[1], xy = _ref[2], vy = _ref[3];
+      this.positions.unshift([xx, xy]);
+      return this.velocities.unshift([vx, vy]);
+    };
+
+    Skier.prototype.getPositions = function() {
+      return this.positions;
+    };
+
+    Skier.prototype.getVelocities = function() {
+      return this.velocities;
     };
 
     return Skier;
 
   })();
-
-  ol = trol(+"ss");
-
-  result["y"][result.y.length - 1][0] * 100 < 100;
 
   Solver = (function() {
     var compute_sin_cos_beta, vectorfield,
@@ -161,22 +166,9 @@
 
   root.OptimalGiant.solver = new Solver().solve;
 
-  x0 = [0, 0];
+  root.OptimalGiant.Skier = Skier;
 
-  v0 = [0, 19];
+  'start = Date.now()                                                                    \n\nsk = new Skier()\nn = 0\nsteep = 0.1\nt0 = 0\nwhile n < 1000\n  t1 = t0+steep\n  sk.move(t0, t1)\n  t0 = t1\n  n += 1\n\nduration = Date.now() - start\nconsole.log sk.getPositions().reverse() ';
 
-  kappa = 1.0 / 20;
-
-  start = Date.now();
-
-  result = new Solver().solve(0, 1, x0, v0, kappa, skier = new Skier());
-
-  duration = Date.now() - start;
-
-  sk = new Skier();
-
-  sk.move();
-
-  console.log(result.y[result.y.length - 1][0]);
 
 }).call(this);

@@ -896,6 +896,7 @@ window.require.define({"views/header_view": function(exports, require, module) {
 
 window.require.define({"views/home_page_view": function(exports, require, module) {
   var HomePageView, PageView, template,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -908,6 +909,9 @@ window.require.define({"views/home_page_view": function(exports, require, module
     __extends(HomePageView, _super);
 
     function HomePageView() {
+      this.work = __bind(this.work, this);
+
+      this.draw = __bind(this.draw, this);
       return HomePageView.__super__.constructor.apply(this, arguments);
     }
 
@@ -915,20 +919,35 @@ window.require.define({"views/home_page_view": function(exports, require, module
 
     HomePageView.prototype.className = 'home-page';
 
-    HomePageView.prototype.initialize = function() {
-      var data, worker,
-        _this = this;
-      HomePageView.__super__.initialize.apply(this, arguments);
-      worker = new Worker('javascripts/worker.js');
-      worker.onmessage = function(event) {
-        console.log(event.data);
-        return alert("Computations finished in " + event.data[0] + " seconds");
+    HomePageView.prototype.afterRender = function() {
+      HomePageView.__super__.afterRender.apply(this, arguments);
+      this.context = this.$('#slope').get(0).getContext('2d');
+      this.worker = new Worker('javascripts/worker.js');
+      return this.work();
+    };
+
+    HomePageView.prototype.draw = function(data) {
+      var pair, x, y, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = data.length; _i < _len; _i++) {
+        pair = data[_i];
+        console.log(pair);
+        x = Math.round(pair[0] * (-1));
+        y = Math.round(pair[1] * (-1));
+        this.context.beginPath();
+        this.context.moveTo(x, y);
+        this.context.lineTo(x + 1, y + 1);
+        _results.push(this.context.stroke());
+      }
+      return _results;
+    };
+
+    HomePageView.prototype.work = function() {
+      var _this = this;
+      this.worker.onmessage = function(event) {
+        return _this.draw(event.data[1]);
       };
-      data = {
-        v0: [0, 19],
-        kappa: 1.0 / 20
-      };
-      return worker.postMessage(data);
+      return this.worker.postMessage();
     };
 
     return HomePageView;
@@ -1073,7 +1092,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<a href=\"https://github.com/martar/optimal-gigant\">\n  OptimalGiant\n</a>\n";});
+    return "<a href=\"https://github.com/martar/optimal-gigant\">\n  OptimalGiant\n</a>\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
