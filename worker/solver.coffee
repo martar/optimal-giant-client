@@ -17,7 +17,6 @@ square = (x) => x*x
 mag = ( [x,y]) => Math.sqrt(square(x) + square(y))
 g = 9.80665 # standard acceleration of free fall
 
-sign_omega = -1
 B = 4 #  boundary value (in m/s) from with air drag becomes proportional to the square of the velocity
 k1 = 0.05 # out of space driven value
 
@@ -34,9 +33,9 @@ class Skier
     @velocities = [v0]
     @positions = [x0]
 	
-  move: (t0, t1, kappa) ->
-    result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, this).y
-    [xx, vx, xy, vy] =result[result.length-1]
+  move: (t0, t1, kappa, sign_omega = 1) ->
+    result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, sign_omega, this).y
+    [xx, xy, vx, vy] =result[result.length-1]
     @positions.unshift [xx, xy]
     @velocities.unshift [vx, vy]
 	
@@ -60,7 +59,7 @@ class Solver
     
   vectorfield = (t,v, params) =>
     [_, _, vx, vy] = v
-    [skier, kappa, sinus, cosinus] = [params.skier, params.kappa, params.sinus, params.cosinus]
+    [skier, kappa, sinus, cosinus, sign_omega] = [params.skier, params.kappa, params.sinus, params.cosinus, params.sign_omega]
     vl = mag [vx,vy]
     f_R = (square(vl))*Math.abs(kappa)
     f_r = f_R + sign_omega*g*sin(alfa)*cosinus
@@ -70,7 +69,7 @@ class Solver
     N = sqrt ( square((g*cos(alfa))) + square((f_R)) )
     f = [ vx, vy, f_r*sinus*sign_omega- (skier.mi*N + k1/skier.m*vl + square(skier.k2/skier.m*vl))*cosinus, g*sin(alfa) - f_r*cosinus*sign_omega - (skier.mi*N + k1/skier.m*vl + skier.k2/skier.m*square(vl))*sinus]
     
-  solve : (start=0, end=1, x0=[0,0], v0=[0,19], kappa=0.05, skier=new Skier()) =>
+  solve : (start=0, end=1, x0=[0,0], v0=[0,19], kappa=0.05, sign_omega=1, skier=new Skier()) =>
     '''
     Air drag is proportional to the square of velocity
     when the velocity is grater than some boundary value: B.
@@ -82,7 +81,7 @@ class Solver
     else
       k1 = 0
     [sinus, cosinus] = compute_sin_cos_beta(v0)
-    params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus}
+    params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus, sign_omega:sign_omega}
     lib.numeric.dopri_params(start,end,[x0[0], x0[1], v0[0], v0[1]], vectorfield, params)  
 
 root = exports ? this

@@ -4,20 +4,33 @@
   importScripts('solver.js');
 
   self.onmessage = function(ev) {
-    var duration, n, skier, start, steep, t0, t1;
+    var duration, n, skier, skier2, start, steep, t0, t1;
     start = Date.now();
-    skier = new OptimalGiant.Skier(this.mi = 0.05, this.m = 60, this.C = 0.6, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = [0, 0], this.v0 = [0, 10]);
+    skier = new OptimalGiant.Skier(this.mi = 0.05, this.m = 60, this.C = 0.6, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = [0, 0], this.v0 = [0, 0]);
+    skier2 = new OptimalGiant.Skier(this.mi = 0.05, this.m = 60, this.C = 0.6, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = [0, 0], this.v0 = [0, 10]);
     n = 0;
-    steep = 0.1;
+    steep = 0.01;
     t0 = 0;
-    while (n < 1000) {
+    while (n < 5000) {
       t1 = t0 + steep;
-      skier.move(t0, t1, 0.05);
+      skier.move(t0, t1, 0.05, 1);
+      skier2.move(t0, t1, 0.05, 1);
       t0 = t1;
       n += 1;
     }
     duration = Date.now() - start;
-    return postMessage([duration, skier.getPositions()]);
+    return postMessage({
+      duration: duration,
+      skiers: [
+        {
+          positions: skier.getPositions(),
+          color: "red"
+        }, {
+          positions: skier2.getPositions(),
+          color: "blue"
+        }
+      ]
+    });
   };
 
 }).call(this);

@@ -927,17 +927,30 @@ window.require.define({"views/home_page_view": function(exports, require, module
     };
 
     HomePageView.prototype.draw = function(data) {
-      var pair, x, y, _i, _len, _results;
+      var pair, skier, x, y, _i, _len, _ref, _ref1, _results;
+      _ref = data.skiers;
       _results = [];
-      for (_i = 0, _len = data.length; _i < _len; _i++) {
-        pair = data[_i];
-        console.log(pair);
-        x = Math.round(pair[0] * (-1));
-        y = Math.round(pair[1] * (-1));
-        this.context.beginPath();
-        this.context.moveTo(x, y);
-        this.context.lineTo(x + 1, y + 1);
-        _results.push(this.context.stroke());
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        skier = _ref[_i];
+        if ((_ref1 = skier.color) == null) {
+          skier.color = "black";
+        }
+        this.context.strokeStyle = skier.color;
+        _results.push((function() {
+          var _j, _len1, _ref2, _results1;
+          _ref2 = skier.positions;
+          _results1 = [];
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            pair = _ref2[_j];
+            x = Math.round(pair[0] * 10);
+            y = Math.round(pair[1] * 10);
+            this.context.beginPath();
+            this.context.moveTo(x, y);
+            this.context.lineTo(x + 1, y + 1);
+            _results1.push(this.context.stroke());
+          }
+          return _results1;
+        }).call(this));
       }
       return _results;
     };
@@ -945,7 +958,7 @@ window.require.define({"views/home_page_view": function(exports, require, module
     HomePageView.prototype.work = function() {
       var _this = this;
       this.worker.onmessage = function(event) {
-        return _this.draw(event.data[1]);
+        return _this.draw(event.data);
       };
       return this.worker.postMessage();
     };

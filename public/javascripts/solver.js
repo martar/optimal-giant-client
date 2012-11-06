@@ -2,7 +2,7 @@
 (function() {
   'this is a hack that enables the usage of this script in both: the browser via Web Workers or in Node.js';
 
-  var B, Skier, Solver, alfa, cos, g, k1, lib, mag, pi, root, sign_omega, sin, sqrt, square,
+  var B, Skier, Solver, alfa, cos, g, k1, lib, mag, pi, root, sin, sqrt, square,
     _this = this,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -37,8 +37,6 @@
 
   g = 9.80665;
 
-  sign_omega = -1;
-
   B = 4;
 
   k1 = 0.05;
@@ -62,10 +60,13 @@
       this.positions = [x0];
     }
 
-    Skier.prototype.move = function(t0, t1, kappa) {
+    Skier.prototype.move = function(t0, t1, kappa, sign_omega) {
       var result, vx, vy, xx, xy, _ref;
-      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, this).y;
-      _ref = result[result.length - 1], xx = _ref[0], vx = _ref[1], xy = _ref[2], vy = _ref[3];
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, sign_omega, this).y;
+      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
       this.positions.unshift([xx, xy]);
       return this.velocities.unshift([vx, vy]);
     };
@@ -106,9 +107,9 @@
     };
 
     vectorfield = function(t, v, params) {
-      var N, cosinus, f, f_R, f_r, kappa, sinus, skier, vl, vx, vy, _, _ref;
+      var N, cosinus, f, f_R, f_r, kappa, sign_omega, sinus, skier, vl, vx, vy, _, _ref;
       _ = v[0], _ = v[1], vx = v[2], vy = v[3];
-      _ref = [params.skier, params.kappa, params.sinus, params.cosinus], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3];
+      _ref = [params.skier, params.kappa, params.sinus, params.cosinus, params.sign_omega], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3], sign_omega = _ref[4];
       vl = mag([vx, vy]);
       f_R = (square(vl)) * Math.abs(kappa);
       f_r = f_R + sign_omega * g * sin(alfa) * cosinus;
@@ -120,7 +121,7 @@
       return f = [vx, vy, f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
     };
 
-    Solver.prototype.solve = function(start, end, x0, v0, kappa, skier) {
+    Solver.prototype.solve = function(start, end, x0, v0, kappa, sign_omega, skier) {
       var cosinus, params, sinus, v0_length, _ref;
       if (start == null) {
         start = 0;
@@ -136,6 +137,9 @@
       }
       if (kappa == null) {
         kappa = 0.05;
+      }
+      if (sign_omega == null) {
+        sign_omega = 1;
       }
       if (skier == null) {
         skier = new Skier();
@@ -153,7 +157,8 @@
         kappa: kappa,
         skier: skier,
         sinus: sinus,
-        cosinus: cosinus
+        cosinus: cosinus,
+        sign_omega: sign_omega
       };
       return lib.numeric.dopri_params(start, end, [x0[0], x0[1], v0[0], v0[1]], vectorfield, params);
     };
