@@ -87,6 +87,7 @@ class Solver
 root = exports ? this
 root.OptimalGiant = {}
 root.OptimalGiant.Solver = Solver
+
 root.OptimalGiant.Skier = Skier
 	
 '''
