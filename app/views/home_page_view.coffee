@@ -7,7 +7,7 @@ module.exports = class HomePageView extends PageView
   afterRender: ->
     super
     @context = @$('#slope').get(0).getContext('2d')
-    @worker = new Worker 'javascripts/worker.js'
+    @worker = new Worker 'javascripts/turnWorker.js'
     @work()
 	
   draw: (data) =>
@@ -25,5 +25,6 @@ module.exports = class HomePageView extends PageView
   work: () =>
     @worker.onmessage = (event) =>
       @draw event.data
+      console.log event.data
       # alert "Computations finished in #{event.data[0]} seconds"
     @worker.postMessage()
