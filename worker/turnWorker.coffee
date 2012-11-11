@@ -1,4 +1,4 @@
-importScripts 'evolutionAlgorithm3.js'
+importScripts 'evolutionAlgorithm.js'
                              
 self.onmessage = (ev) ->
 	start = Date.now()
