@@ -58,6 +58,7 @@
       this.k2 = 0.5 * this.C * this.roh * this.A;
       this.velocities = [v0];
       this.positions = [x0];
+      this.result = 0;
     }
 
     Skier.prototype.move = function(t0, t1, kappa, sign_omega) {
@@ -69,6 +70,46 @@
       _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
       this.positions.unshift([xx, xy]);
       return this.velocities.unshift([vx, vy]);
+    };
+
+    Skier.prototype.moveWithArbitraryV = function(v, t0, t1, kappa, sign_omega) {
+      var result, vx, vy, xx, xy, _ref;
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      result = this.solver.solve(t0, t1, this.positions[0], v, kappa, sign_omega, this).y;
+      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
+      this.positions.unshift([xx, xy]);
+      return this.velocities.unshift([vx, vy]);
+    };
+
+    'Check if we are in the closest point to the endPoint\nIt is the condition to stop simulation';
+
+
+    Skier.prototype.isNear = function(endPoint) {
+      var min, rKw, x;
+      min = 0.1;
+      x = this.positions[0];
+      rKw = Math.pow(x[0] - endPoint[0], 2) + Math.pow(x[1] - endPoint[1], 2);
+      return rKw < min || x[0] > endPoint[0];
+    };
+
+    'Compute new kappa basing on set points and velocity vector';
+
+
+    Skier.prototype.computeKappa = function(endPoint) {
+      var kappa, vx, vy, x, x1, x2, y, y1, y2, _ref, _ref1;
+      _ref = this.positions[0], x1 = _ref[0], y1 = _ref[1];
+      x2 = endPoint[0], y2 = endPoint[1];
+      _ref1 = this.velocities[0], vx = _ref1[0], vy = _ref1[1];
+      x = (Math.pow(y2 - y1, 2) * vy - 2 * vx * x1 * (y2 - y1) + (Math.pow(x2, 2) - Math.pow(x1, 2)) * vy) / (2 * (-vx * (y2 - y1) + vy * (x2 - x1)));
+      y = (-vx * (Math.pow(y2 - y1, 2) + (Math.pow(x2, 2) - Math.pow(x1, 2)))) / (2 * (-vx * (y2 - y1) + vy * (x2 - x1))) + y1;
+      kappa = 1 / (Math.sqrt(Math.pow(x1 - x, 2) + Math.pow(y1 - y, 2)));
+      return kappa;
+    };
+
+    Skier.prototype.getPosition = function() {
+      return this.positions[0];
     };
 
     Skier.prototype.getPositions = function() {
@@ -173,9 +214,9 @@
 
   root.OptimalGiant.Solver = Solver;
 
-  root.OptimalGiant.Skier = Skier;
+  this.Skier = Skier;
 
-  'start = Date.now()                                                                    \n\nsk = new Skier()\nn = 0\nsteep = 0.1\nt0 = 0\nwhile n < 1000\n  t1 = t0+steep\n  sk.move(t0, t1, 0.05)\n  t0 = t1\n  n += 1\n\nduration = Date.now() - start\nconsole.log sk.getPositions().reverse() ';
+  'start = Date.now()                                                                    \nsteep = 0.01\nt0 = 0\nskier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,19])\n\nendPoint = [1,4]\nkappa = skier.computeKappa(endPoint)\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nconsole.log skier.getPosition()\nendPoint = [5,5]\nkappa = skier.computeKappa(endPoint)\nconsole.log kappa, t0\n\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nduration = Date.now() - start';
 
 
 }).call(this);

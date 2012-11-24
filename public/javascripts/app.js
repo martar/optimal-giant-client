@@ -958,7 +958,8 @@ window.require.define({"views/home_page_view": function(exports, require, module
     HomePageView.prototype.work = function() {
       var _this = this;
       this.worker.onmessage = function(event) {
-        return _this.draw(event.data);
+        _this.draw(event.data);
+        return console.log(event.data);
       };
       return this.worker.postMessage();
     };
@@ -1074,7 +1075,7 @@ window.require.define({"views/templates/header": function(exports, require, modu
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <a class=\"header-link\" href=\"";
+    buffer += "\r\n  <a class=\"header-link\" href=\"";
     foundHelper = helpers.href;
     stack1 = foundHelper || depth0.href;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1084,7 +1085,7 @@ window.require.define({"views/templates/header": function(exports, require, modu
     stack1 = foundHelper || depth0.title;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "title", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\n";
+    buffer += escapeExpression(stack1) + "</a>\r\n";
     return buffer;}
 
     foundHelper = helpers.items;
@@ -1105,7 +1106,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<a href=\"https://github.com/martar/optimal-gigant\">\n  OptimalGiant\n</a>\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\n";});
+    return "<a href=\"https://github.com/martar/optimal-gigant\">\r\n  OptimalGiant\r\n</a>\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
