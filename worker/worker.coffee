@@ -25,7 +25,7 @@ self.onmessage = (ev) ->
 		t0 = t1
 	skier.result = t0
 	duration = Date.now() - start
-	steepPositions = (x for x in skier.getPositions() by 40).reverse()
+	steepPositions = (x for x in skier.getPositions() by 120).reverse()
 	skier2 = new Skier(@mi=0.05, @m=60, @C=0.6, @A=0.2, @solver=new OptimalGiant.Solver, @x0=[0,0], @v0=vstart)
 	kappa = 0.000001
 	#steep2 = 0.001

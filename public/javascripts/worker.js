@@ -36,7 +36,7 @@
       var _i, _len, _ref, _results, _step;
       _ref = skier.getPositions();
       _results = [];
-      for (_i = 0, _len = _ref.length, _step = 40; _i < _len; _i += _step) {
+      for (_i = 0, _len = _ref.length, _step = 120; _i < _len; _i += _step) {
         x = _ref[_i];
         _results.push(x);
       }
