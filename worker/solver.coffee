@@ -92,7 +92,8 @@ class Solver
 			sin_beta = v0[1]/v0_length
 		[sin_beta, cos_beta]
     
-	vectorfield = (t,v, params) =>
+	
+	movementEquasion = (t,v, params) =>
 		[_, _, vx, vy] = v
 		[skier, kappa, sinus, cosinus, sign_omega] = [params.skier, params.kappa, params.sinus, params.cosinus, params.sign_omega]
 		vl = mag [vx,vy]
@@ -117,7 +118,7 @@ class Solver
 			k1 = 0
 		[sinus, cosinus] = compute_sin_cos_beta(v0)
 		params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus, sign_omega:sign_omega}
-		lib.numeric.dopri_params(start,end,[x0[0], x0[1], v0[0], v0[1]], vectorfield, params)  
+		lib.numeric.dopri(start,end,[x0[0], x0[1], v0[0], v0[1]], (t,v) -> movementEquasion(t,v,params))  
 
 root = exports ? this
 root.OptimalGiant = {}
