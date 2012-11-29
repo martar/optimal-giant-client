@@ -9,7 +9,7 @@ module.exports = class HomePageView extends PageView
     @context = @$('#slope').get(0).getContext('2d')
     @worker = new Worker 'javascripts/worker.js'
     @work()
-	
+    
   draw: (data) =>
     for skier in data.skiers
       skier.color ?= "black"
