@@ -34,28 +34,61 @@ class Skier
 		@positions = [x0]
 		@result = 0
 	
-	move: (t0, t1, kappa, sign_omega = 1) ->
-		result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, sign_omega, this).y
-		[xx, xy, vx, vy] =result[result.length-1]
-		@positions.unshift [xx, xy]
-		@velocities.unshift [vx, vy]
-
-	moveWithArbitraryV: (v, t0, t1, kappa, sign_omega = 1) ->
-		result = @solver.solve(t0,t1,@positions[0], v, kappa, sign_omega, this).y
-		[xx, xy, vx, vy] =result[result.length-1]
-		@positions.unshift [xx, xy]
-		@velocities.unshift [vx, vy]
 	'''
-	Check if we are in the closest point to the endPoint
-	It is the condition to stop simulation
+	Move the skier to the endPoint. It is not confirmed that the skier really 
+	managed to reach the proximity of that point
 	'''
-	isNear: (endPoint) ->
-		min = 0.1
-		x = @positions[0]
-		rKw = Math.pow(x[0] - endPoint[0], 2) + Math.pow(x[1] - endPoint[1], 2) 
-		return rKw < min || x[0] > endPoint[0]
-
+	moveToPoint : (endPoint, steep, kappa, sign_omega = 1) ->
+		t0 = @result
+		reachedDestination = false
+		while !reachedDestination
+			t1 = t0+steep
+			reachedDestination = @move(t0, t1, kappa, endPoint, sign_omega)
+			t0 = t1
 	
+	moveToPointWithArbitraryV : (v, endPoint, steep, kappa, sign_omega = 1) ->
+		t0 = @result
+		reachedDestination = false
+		while !reachedDestination
+			t1 = t0+steep
+			reachedDestination = @moveWithArbitraryV(v,t0, t1, kappa, endPoint, sign_omega)
+			t0 = t1
+			
+	'''
+	private method that updates the skier parameters based on the result Sol vector and the endPoint that he was asked to reach. 
+	It scans the result vector and finds the time slot in which the skier really passed the endPoint
+	Return whether the skier reached or overpassed the end point
+	'''
+	whatIsMyResult : (endPoint, result) ->
+		[xEnd, yEnd] = endPoint
+		lastIndex = result.y.length-1
+		reachedDestination = false
+		# TODO can do binary search
+		for resultYSteep, index in result.y
+			[xx, xy, vx, vy] =resultYSteep
+			if (xx > xEnd or xy > yEnd)
+				lastIndex = index
+				reachedDestination = true
+				break
+		[xx, xy, vx, vy] =result.y[lastIndex]
+		@positions.unshift [xx, xy]
+		@velocities.unshift [vx, vy]
+		# update the result in a skier - how much time the movement took
+		@result = result.x[lastIndex]
+		reachedDestination
+		
+	'''
+	Move the skier between t0 and up to t1 time interval. If the endPoint was passed before t1, move the
+	skier just up to that point. Return whether the skier reached or overpassed the end point
+	'''
+	move: (t0, t1, kappa, endPoint, sign_omega = 1) ->
+		result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, sign_omega, this)
+		@whatIsMyResult(endPoint, result)
+
+	moveWithArbitraryV: (v, t0, t1, kappa, endPoint, sign_omega = 1) ->
+		result = @solver.solve(t0,t1,@positions[0], v, kappa, sign_omega, this)
+		@whatIsMyResult(endPoint, result)
+		
 	'''
 	Compute new kappa basing on set points and velocity vector
 	'''
@@ -91,7 +124,6 @@ class Solver
 			cos_beta =  v0[0]/v0_length
 			sin_beta = v0[1]/v0_length
 		[sin_beta, cos_beta]
-    
 	
 	movementEquasion = (t,v, params) =>
 		[_, _, vx, vy] = v
@@ -105,7 +137,7 @@ class Solver
 		N = sqrt ( square((g*cos(alfa))) + square((f_R)) )
 		f = [ vx, vy, f_r*sinus*sign_omega- (skier.mi*N + k1/skier.m*vl + square(skier.k2/skier.m*vl))*cosinus, g*sin(alfa) - f_r*cosinus*sign_omega - (skier.mi*N + k1/skier.m*vl + skier.k2/skier.m*square(vl))*sinus]
     
-	solve : (start=0, end=1, x0=[0,0], v0=[0,19], kappa=0.05, sign_omega=1, skier=new Skier()) =>
+	solve : (start=0, end=1, x0=[0,0], v0=[0,19], kappa=0.05, sign_omega=1, skier=new Skier(), endPoint) =>
 		'''
 		Air drag is proportional to the square of velocity
 		when the velocity is grater than some boundary value: B.
@@ -118,7 +150,8 @@ class Solver
 			k1 = 0
 		[sinus, cosinus] = compute_sin_cos_beta(v0)
 		params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus, sign_omega:sign_omega}
-		lib.numeric.dopri(start,end,[x0[0], x0[1], v0[0], v0[1]], (t,v) -> movementEquasion(t,v,params))  
+		result = lib.numeric.dopri(start,end,[x0[0], x0[1], v0[0], v0[1]], ((t,v) -> movementEquasion(t,v,params)))  
+		result
 
 root = exports ? this
 root.OptimalGiant = {}
@@ -128,25 +161,15 @@ root.OptimalGiant.Solver = Solver
 	
 '''
 start = Date.now()                                                                    
-steep = 0.01
+steep = 0.001
 t0 = 0
-skier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,19])
+skier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,1])
 
 endPoint = [1,4]
 kappa = skier.computeKappa(endPoint)
-while !skier.isNear(endPoint)
-  t1 = t0+steep
-  skier.move(t0, t1, kappa)
-  t0 = t1
+skier.moveToPoint(endPoint, steep, kappa)
 console.log skier.getPosition()
-endPoint = [5,5]
-kappa = skier.computeKappa(endPoint)
-console.log kappa, t0
-
-while !skier.isNear(endPoint)
-  t1 = t0+steep
-  skier.move(t0, t1, kappa)
-  t0 = t1
+console.log skier.result
 duration = Date.now() - start
 '''
                  

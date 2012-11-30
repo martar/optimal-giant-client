@@ -61,37 +61,85 @@
       this.result = 0;
     }
 
-    Skier.prototype.move = function(t0, t1, kappa, sign_omega) {
-      var result, vx, vy, xx, xy, _ref;
+    'Move the skier to the endPoint. It is not confirmed that the skier really \nmanaged to reach the proximity of that point';
+
+
+    Skier.prototype.moveToPoint = function(endPoint, steep, kappa, sign_omega) {
+      var reachedDestination, t0, t1, _results;
       if (sign_omega == null) {
         sign_omega = 1;
       }
-      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, sign_omega, this).y;
-      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
-      this.positions.unshift([xx, xy]);
-      return this.velocities.unshift([vx, vy]);
+      t0 = this.result;
+      reachedDestination = false;
+      _results = [];
+      while (!reachedDestination) {
+        t1 = t0 + steep;
+        reachedDestination = this.move(t0, t1, kappa, endPoint, sign_omega);
+        _results.push(t0 = t1);
+      }
+      return _results;
     };
 
-    Skier.prototype.moveWithArbitraryV = function(v, t0, t1, kappa, sign_omega) {
-      var result, vx, vy, xx, xy, _ref;
+    Skier.prototype.moveToPointWithArbitraryV = function(v, endPoint, steep, kappa, sign_omega) {
+      var reachedDestination, t0, t1, _results;
       if (sign_omega == null) {
         sign_omega = 1;
       }
-      result = this.solver.solve(t0, t1, this.positions[0], v, kappa, sign_omega, this).y;
-      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
-      this.positions.unshift([xx, xy]);
-      return this.velocities.unshift([vx, vy]);
+      t0 = this.result;
+      reachedDestination = false;
+      _results = [];
+      while (!reachedDestination) {
+        t1 = t0 + steep;
+        reachedDestination = this.moveWithArbitraryV(v, t0, t1, kappa, endPoint, sign_omega);
+        _results.push(t0 = t1);
+      }
+      return _results;
     };
 
-    'Check if we are in the closest point to the endPoint\nIt is the condition to stop simulation';
+    'private method that updates the skier parameters based on the result Sol vector and the endPoint that he was asked to reach. \nIt scans the result vector and finds the time slot in which the skier really passed the endPoint\nReturn whether the skier reached or overpassed the end point';
 
 
-    Skier.prototype.isNear = function(endPoint) {
-      var min, rKw, x;
-      min = 0.1;
-      x = this.positions[0];
-      rKw = Math.pow(x[0] - endPoint[0], 2) + Math.pow(x[1] - endPoint[1], 2);
-      return rKw < min || x[0] > endPoint[0];
+    Skier.prototype.whatIsMyResult = function(endPoint, result) {
+      var index, lastIndex, reachedDestination, resultYSteep, vx, vy, xEnd, xx, xy, yEnd, _i, _len, _ref, _ref1;
+      xEnd = endPoint[0], yEnd = endPoint[1];
+      lastIndex = result.y.length - 1;
+      reachedDestination = false;
+      _ref = result.y;
+      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+        resultYSteep = _ref[index];
+        xx = resultYSteep[0], xy = resultYSteep[1], vx = resultYSteep[2], vy = resultYSteep[3];
+        if (xx > xEnd || xy > yEnd) {
+          lastIndex = index;
+          reachedDestination = true;
+          break;
+        }
+      }
+      _ref1 = result.y[lastIndex], xx = _ref1[0], xy = _ref1[1], vx = _ref1[2], vy = _ref1[3];
+      this.positions.unshift([xx, xy]);
+      this.velocities.unshift([vx, vy]);
+      this.result = result.x[lastIndex];
+      return reachedDestination;
+    };
+
+    'Move the skier between t0 and up to t1 time interval. If the endPoint was passed before t1, move the\nskier just up to that point. Return whether the skier reached or overpassed the end point';
+
+
+    Skier.prototype.move = function(t0, t1, kappa, endPoint, sign_omega) {
+      var result;
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, sign_omega, this);
+      return this.whatIsMyResult(endPoint, result);
+    };
+
+    Skier.prototype.moveWithArbitraryV = function(v, t0, t1, kappa, endPoint, sign_omega) {
+      var result;
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      result = this.solver.solve(t0, t1, this.positions[0], v, kappa, sign_omega, this);
+      return this.whatIsMyResult(endPoint, result);
     };
 
     'Compute new kappa basing on set points and velocity vector';
@@ -162,8 +210,8 @@
       return f = [vx, vy, f_r * sinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + square(skier.k2 / skier.m * vl)) * cosinus, g * sin(alfa) - f_r * cosinus * sign_omega - (skier.mi * N + k1 / skier.m * vl + skier.k2 / skier.m * square(vl)) * sinus];
     };
 
-    Solver.prototype.solve = function(start, end, x0, v0, kappa, sign_omega, skier) {
-      var cosinus, params, sinus, v0_length, _ref;
+    Solver.prototype.solve = function(start, end, x0, v0, kappa, sign_omega, skier, endPoint) {
+      var cosinus, params, result, sinus, v0_length, _ref;
       if (start == null) {
         start = 0;
       }
@@ -201,9 +249,10 @@
         cosinus: cosinus,
         sign_omega: sign_omega
       };
-      return lib.numeric.dopri(start, end, [x0[0], x0[1], v0[0], v0[1]], function(t, v) {
+      result = lib.numeric.dopri(start, end, [x0[0], x0[1], v0[0], v0[1]], (function(t, v) {
         return movementEquasion(t, v, params);
-      });
+      }));
+      return result;
     };
 
     return Solver;
@@ -218,7 +267,7 @@
 
   this.Skier = Skier;
 
-  'start = Date.now()                                                                    \nsteep = 0.01\nt0 = 0\nskier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,19])\n\nendPoint = [1,4]\nkappa = skier.computeKappa(endPoint)\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nconsole.log skier.getPosition()\nendPoint = [5,5]\nkappa = skier.computeKappa(endPoint)\nconsole.log kappa, t0\n\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nduration = Date.now() - start';
+  'start = Date.now()                                                                    \nsteep = 0.001\nt0 = 0\nskier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,1])\n\nendPoint = [1,4]\nkappa = skier.computeKappa(endPoint)\nskier.moveToPoint(endPoint, steep, kappa)\nconsole.log skier.getPosition()\nconsole.log skier.result\nduration = Date.now() - start';
 
 
 }).call(this);
