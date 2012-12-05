@@ -18,7 +18,6 @@ mag = ( [x,y]) => Math.sqrt(square(x) + square(y))
 g = 9.80665 # standard acceleration of free fall
 g = 9.81
 B = 4 #  boundary value (in m/s) from with air drag becomes proportional to the square of the velocity
-<<<<<<< HEAD
 k1 = 0.05 # out of space driven value
 # TODO only for test
 k1 = 0
