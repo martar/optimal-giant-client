@@ -920,7 +920,7 @@ window.require.define({"views/home_page_view": function(exports, require, module
     HomePageView.prototype.afterRender = function() {
       HomePageView.__super__.afterRender.apply(this, arguments);
       this.context = this.$('#slope').get(0).getContext('2d');
-      this.worker = new Worker('javascripts/worker.js');
+      this.worker = new Worker('javascripts/turnWorker.js');
       return this.work();
     };
 

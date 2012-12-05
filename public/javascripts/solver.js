@@ -41,7 +41,11 @@ this is a hack that enables the usage of this script in both: the browser via We
 
   g = 9.80665;
 
+  g = 9.81;
+
   B = 4;
+
+  k1 = 0.05;
 
   k1 = 0;
 
@@ -95,6 +99,7 @@ this is a hack that enables the usage of this script in both: the browser via We
       this.velocities = [v0];
       this.positions = [x0];
       this.result = 0;
+      this.min = 10000;
     }
 
     /*
@@ -161,14 +166,21 @@ this is a hack that enables the usage of this script in both: the browser via We
 
 
     Skier.prototype.computeKappa = function(endPoint) {
-      var kappa, vx, vy, x, x1, x2, y, y1, y2, _ref, _ref1;
+      var kappa, x, x1, y, y1, _ref, _ref1;
+      _ref = this.positions[0], x1 = _ref[0], y1 = _ref[1];
+      _ref1 = this.getCircleCenter(endPoint), x = _ref1[0], y = _ref1[1];
+      kappa = 1 / (Math.sqrt(Math.pow(x1 - x, 2) + Math.pow(y1 - y, 2)));
+      return kappa;
+    };
+
+    Skier.prototype.getCircleCenter = function(endPoint) {
+      var vx, vy, x, x1, x2, y, y1, y2, _ref, _ref1;
       _ref = this.positions[0], x1 = _ref[0], y1 = _ref[1];
       x2 = endPoint[0], y2 = endPoint[1];
       _ref1 = this.velocities[0], vx = _ref1[0], vy = _ref1[1];
       x = (Math.pow(y2 - y1, 2) * vy - 2 * vx * x1 * (y2 - y1) + (Math.pow(x2, 2) - Math.pow(x1, 2)) * vy) / (2 * (-vx * (y2 - y1) + vy * (x2 - x1)));
       y = (-vx * (Math.pow(y2 - y1, 2) + (Math.pow(x2, 2) - Math.pow(x1, 2)))) / (2 * (-vx * (y2 - y1) + vy * (x2 - x1))) + y1;
-      kappa = 1 / (Math.sqrt(Math.pow(x1 - x, 2) + Math.pow(y1 - y, 2)));
-      return kappa;
+      return [x, y];
     };
 
     Skier.prototype.getPosition = function() {

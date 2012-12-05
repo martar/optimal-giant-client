@@ -78,24 +78,9 @@ class PointsSet extends evol.Individual
 		@min = 100000
 
 		for nextPos in @value
-			v = findCoords( (nextPos[1] - @skier.getPositions()[0][1])/(nextPos[0] - @skier.getPositions()[0][0]), 
-				Math.sqrt( Math.pow(@skier.getVelocities()[0][0],2) + Math.pow(@skier.getVelocities()[0][1],2)))
-			@skier.moveWithArbitraryV(v, t, t+interval, 0, 1)
-			t+=interval
-			tt0 = 0
-			a = false
-			while ( !@skier.isNear(nextPos))
-				a = true
-				@skier.move(tt0,tt0+interval,0,1)
-				tt0+=interval
-			if a
-				tt0-=interval
-				@skier.getPositions().shift()
-				@skier.getVelocities().shift()
-			t += tt0
-		
+			@skier.moveStraightToPoint(interval, nextPos)
 		#console.log "czas: ", t
-		@fitness = t
+		@fitness = @skier.result
 		
 	createCopy: (changedPoints) ->
 		skierPos = @skier.getPositions()

@@ -7,7 +7,7 @@ module.exports = class HomePageView extends PageView
 	afterRender: ->
 		super
 		@context = @$('#slope').get(0).getContext('2d')
-		@worker = new Worker 'javascripts/worker.js'
+		@worker = new Worker 'javascripts/turnWorker.js'
 		@work()
 
 	draw: (data) ->
