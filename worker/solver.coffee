@@ -91,8 +91,6 @@ class Skier
 			
 	move: (steep, kappa, endPoint, sign_omega = 1) ->
 		result = @solver.solve(@result,@result+steep,@positions[0], @velocities[0], kappa, sign_omega, this)
-		console.log result.at([0.7])
-		console.log result
 		@whatIsMyResult(endPoint, result)
 
 	###

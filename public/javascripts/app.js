@@ -910,8 +910,6 @@ window.require.define({"views/home_page_view": function(exports, require, module
 
     function HomePageView() {
       this.work = __bind(this.work, this);
-
-      this.draw = __bind(this.draw, this);
       return HomePageView.__super__.constructor.apply(this, arguments);
     }
 
@@ -955,11 +953,26 @@ window.require.define({"views/home_page_view": function(exports, require, module
       return _results;
     };
 
+    HomePageView.prototype.renderResults = function(data) {
+      var skier, _i, _len, _ref, _ref1, _results;
+      _ref = data.skiers;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        skier = _ref[_i];
+        if ((_ref1 = skier.color) == null) {
+          skier.color = "black";
+        }
+        _results.push(this.$('#results').append($("<li></li>").html(skier.color + ' ' + skier.time)));
+      }
+      return _results;
+    };
+
     HomePageView.prototype.work = function() {
       var _this = this;
       this.worker.onmessage = function(event) {
         _this.draw(event.data);
-        return console.log(event.data);
+        console.log(event.data);
+        return _this.renderResults(event.data);
       };
       return this.worker.postMessage();
     };
@@ -1106,7 +1119,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<a href=\"https://github.com/martar/optimal-gigant\">\r\n  OptimalGiant\r\n</a>\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n";});
+    return "<ul id=\"results\">\r\n\r\n</ul>\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

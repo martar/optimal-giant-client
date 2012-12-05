@@ -76,6 +76,12 @@
       this.result = 0;
     }
 
+    Skier.prototype.reset = function() {
+      this.velocities = [this.velocities[this.velocities.length - 1]];
+      this.positions = [this.positions[this.positions - 1]];
+      return this.result = 0;
+    };
+
     Skier.prototype.whatIsMyResult = function(endPoint, result) {
       var index, lastIndex, reachedDestination, resultYSteep, vx, vy, xEnd, xx, xy, yEnd, _i, _len, _ref, _ref1;
       xEnd = endPoint[0], yEnd = endPoint[1];
@@ -139,6 +145,18 @@
       }
       result = this.solver.solve(this.result, this.result + steep, this.positions[0], this.velocities[0], kappa, sign_omega, this);
       return this.whatIsMyResult(endPoint, result);
+    };
+
+    /*
+    	just show the result, without any sideeffect and changing state of the skier
+    */
+
+
+    Skier.prototype.moveDebug = function(steep, kappa, endPoint, sign_omega) {
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      return this.solver.solve(this.result, this.result + steep, this.positions[0], this.velocities[0], kappa, sign_omega, this);
     };
 
     Skier.prototype.moveWithArbitraryV = function(v, steep, kappa, endPoint, sign_omega) {
@@ -300,16 +318,23 @@
   vstart = [1,10]
   startPoint = [0,0]
   skier = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new Solver, @x0=startPoint, @v0=vstart)
-  steep = 0.001
+  steep = 1
   t0 = 0
   endPoint = [50,50]
   
-  steepPositions = getCurveCoordinates(steep, endPoint, skier, 100)
+  # steepPositions = getCurveCoordinates(steep, endPoint, skier, 100)
   skier2 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new Solver, @x0=startPoint, @v0=vstart)
   kappa = 0.000001
-  for pos in steepPositions
-  	skier2.moveStraightToPoint(pos, steep)
-  	console.log skier2.result
+  
+  #skier2.moveStraightToPoint(steepPositions[1], steep)
+  result = skier2.moveDebug(steep, kappa, endPoint)
+  console.log result
+  console.log "------"
+  console.log result.at([0.7])
+  console.log "------"
+  skier2.reset()
+  result = skier2.moveDebug(0.7, kappa, endPoint) 
+  console.log result
   */
 
 
