@@ -39,7 +39,7 @@
 
   B = 4;
 
-  k1 = 0.05;
+  k1 = 0;
 
   alfa = pi / 6;
 
@@ -125,7 +125,7 @@
   })();
 
   Solver = (function() {
-    var compute_sin_cos_beta, vectorfield,
+    var compute_sin_cos_beta, movementEquasion,
       _this = this;
 
     function Solver() {
@@ -147,7 +147,7 @@
       return [sin_beta, cos_beta];
     };
 
-    vectorfield = function(t, v, params) {
+    movementEquasion = function(t, v, params) {
       var N, cosinus, f, f_R, f_r, kappa, sign_omega, sinus, skier, vl, vx, vy, _, _ref;
       _ = v[0], _ = v[1], vx = v[2], vy = v[3];
       _ref = [params.skier, params.kappa, params.sinus, params.cosinus, params.sign_omega], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3], sign_omega = _ref[4];
@@ -201,7 +201,9 @@
         cosinus: cosinus,
         sign_omega: sign_omega
       };
-      return lib.numeric.dopri_params(start, end, [x0[0], x0[1], v0[0], v0[1]], vectorfield, params);
+      return lib.numeric.dopri(start, end, [x0[0], x0[1], v0[0], v0[1]], function(t, v) {
+        return movementEquasion(t, v, params);
+      });
     };
 
     return Solver;

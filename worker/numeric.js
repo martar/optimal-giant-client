@@ -1,15 +1,15 @@
+"use strict";
+
 var numeric = (typeof exports === "undefined")?(function numeric() {}):(exports);
 if(typeof global !== "undefined") { global.numeric = numeric; }
 
-numeric.version = "1.2.3-with-patch";
-// This is a patched version of the lib from my fork: https://github.com/martar/numeric
-// Basicly I Added function dopri_params that adds the possibility to add additional parameters to function passed to dopri solver
+numeric.version = "1.2.4";
 
 // 1. Utility functions
 numeric.bench = function bench (f,interval) {
     var t1,t2,n,i;
     if(typeof interval === "undefined") { interval = 15; }
-    n = 1;
+    n = 0.5;
     t1 = new Date();
     while(1) {
         n*=2;
@@ -24,19 +24,7 @@ numeric.bench = function bench (f,interval) {
     return 1000*(3*n-1)/(t2-t1);
 }
 
-/* 
- * IE doesn't have a global eval that works?
- * This apparently returns nothing: window.execScript('function () {}').            
- * Other things that don't work: window.execScript('foo = eval("function () {}");')
- */
-if(1 || typeof window === "undefined" || typeof window.execScript !== "undefined") numeric.Function = Function;
-else numeric.Function = function() {
-    var foo = '(function (';
-    for(var k=0;k<arguments.length-1;++k) { if(k>0) foo+=','; foo += arguments[k]; }
-    foo += ') { \n'+arguments[k]+'\n});';
-    return window.eval(foo);
-}
-
+numeric.Function = Function;
 numeric.precision = 4;
 numeric.largeArray = 50;
 
@@ -334,7 +322,7 @@ numeric.dim = function dim(x) {
 }
 
 numeric.mapreduce = function mapreduce(body,init) {
-    return numeric.Function('x','accum','_s','_k',
+    return Function('x','accum','_s','_k',
             'if(typeof accum === "undefined") accum = '+init+';\n'+
             'if(typeof x === "number") { var xi = x; '+body+'; return accum; }\n'+
             'if(typeof _s === "undefined") _s = numeric.dim(x);\n'+
@@ -564,7 +552,7 @@ numeric.pointwise = function pointwise(params,body,setup) {
             '}\n'+
             'return ret;'
             );
-    return numeric.Function.apply(null,fun);
+    return Function.apply(null,fun);
 }
 
 numeric._biforeach = (function _biforeach(x,y,s,k,f) {
@@ -628,7 +616,7 @@ numeric.ops1 = {
             numeric[i+'VV'] = numeric.pointwise(['x[i]','y[i]'],'ret[i] = x[i] '+o+' y[i];');
             numeric[i+'SV'] = numeric.pointwise(['x','y[i]'],'ret[i] = x '+o+' y[i];');
             numeric[i+'VS'] = numeric.pointwise(['x[i]','y'],'ret[i] = x[i] '+o+' y;');
-            numeric[i] = numeric.Function(
+            numeric[i] = Function(
                     'var n = arguments.length, i, x = arguments[0], y;\n'+
                     'var VV = numeric.'+i+'VV, VS = numeric.'+i+'VS, SV = numeric.'+i+'SV;\n'+
                     'for(i=1;i!==n;++i) { \n'+
@@ -646,13 +634,13 @@ numeric.ops1 = {
         if(numeric.ops1.hasOwnProperty(i)) {
             o = numeric.ops1[i];
             numeric[i+'V'] = numeric.pointwise(['x[i]'],'ret[i] = '+o+'x[i];');
-            numeric[i] = numeric.Function('x','if(typeof x === "object") return numeric.'+i+'V(x);\nreturn '+o+'(x);');
+            numeric[i] = Function('x','if(typeof x === "object") return numeric.'+i+'V(x);\nreturn '+o+'(x);');
         }
     }
     for(i=0;i<numeric.mathfuns.length;i++) {
         o = numeric.mathfuns[i];
         numeric[o+'V'] = numeric.pointwise(['x[i]'],'ret[i] = fun(x[i]);','var fun = Math.'+o+';');
-        numeric[o] = numeric.Function('x','if(typeof x === "object") return numeric.'+o+'V(x);\nreturn Math.'+o+'(x);');
+        numeric[o] = Function('x','if(typeof x === "object") return numeric.'+o+'V(x);\nreturn Math.'+o+'(x);');
     }
     numeric.isNaNV = numeric.pointwise(['x[i]'],'ret[i] = isNaN(x[i]);');
     numeric.isNaN = function isNaN(x) { if(typeof x === "object") return numeric.isNaNV(x); return isNaN(x); }
@@ -660,13 +648,13 @@ numeric.ops1 = {
     numeric.isFinite = function isNaN(x) { if(typeof x === "object") return numeric.isFiniteV(x); return isFinite(x); }
     for(i in numeric.opseq) {
         if(numeric.opseq.hasOwnProperty(i)) {
-            numeric[i+'S'] = numeric.Function('x','y',
+            numeric[i+'S'] = Function('x','y',
                     'var n = x.length, i;\n'+
                     'for(i=n-1;i>=0;i--) x[i] '+numeric.opseq[i]+' y;');
-            numeric[i+'V'] = numeric.Function('x','y',
+            numeric[i+'V'] = Function('x','y',
                     'var n = x.length, i;\n'+
                     'for(i=n-1;i>=0;i--) x[i] '+numeric.opseq[i]+' y[i];');
-            numeric[i] = numeric.Function('x','y',
+            numeric[i] = Function('x','y',
                     'var s = numeric.dim(x);\n'+
                     'if(typeof y === "number") { numeric._biforeach(x,y,s,0,numeric.'+i+'S); return x; }\n'+
                     'numeric._biforeach(x,y,s,0,numeric.'+i+'V);\n'+
@@ -738,8 +726,8 @@ numeric.inv = function inv(x) {
     var I = numeric.identity(m), Ii, Ij;
     var i,j,k,x;
     for(j=0;j<n;++j) {
-        i0 = -1;
-        v0 = -1;
+        var i0 = -1;
+        var v0 = -1;
         for(i=j;i!==m;++i) { k = abs(A[i][j]); if(k>v0) { i0 = i; v0 = k; } }
         Aj = A[i0]; A[i0] = A[j]; A[j] = Aj;
         Ij = I[i0]; I[i0] = I[j]; I[j] = Ij;
@@ -979,7 +967,7 @@ numeric.Tbinop = function Tbinop(rr,rc,cr,cc,setup) {
             }
         }
     }
-    return numeric.Function(['y'],
+    return Function(['y'],
             'var x = this;\n'+
             'if(!(y instanceof numeric.T)) { y = new numeric.T(y); }\n'+
             setup+'\n'+
@@ -1045,7 +1033,7 @@ numeric.T.prototype.transjugate = function transjugate() {
 }
 numeric.Tunop = function Tunop(r,c,s) {
     if(typeof s !== "string") { s = ''; }
-    return numeric.Function(
+    return Function(
             'var x = this;\n'+
             s+'\n'+
             'if(x.y) {'+
@@ -1802,8 +1790,8 @@ numeric.ccsGetBlock = function ccsGetBlock(A,i,j) {
     var x = numeric.rep([m],0),count=0,flags = numeric.rep([m],0);
     for(q=0;q<Q;++q) {
         jq = j[q];
-        q0 = Ai[jq];
-        q1 = Ai[jq+1];
+        var q0 = Ai[jq];
+        var q1 = Ai[jq+1];
         for(p=q0;p<q1;++p) {
             r = Aj[p];
             flags[r] = 1;
@@ -1911,7 +1899,7 @@ numeric.ccsLUPSolve = function ccsLUPSolve(LUP,B) {
 
 numeric.ccsbinop = function ccsbinop(body,setup) {
     if(typeof setup === "undefined") setup='';
-    return numeric.Function('X','Y',
+    return Function('X','Y',
             'var Xi = X[0], Xj = X[1], Xv = X[2];\n'+
             'var Yi = Y[0], Yj = Y[1], Yv = Y[2];\n'+
             'var n = Xi.length-1,m = Math.max(numeric.sup(Xj),numeric.sup(Yj))+1;\n'+
@@ -1967,7 +1955,7 @@ numeric.ccsbinop = function ccsbinop(body,setup) {
         if(isFinite(eval('1'+numeric.ops2[k]+'0')) && isFinite(eval('0'+numeric.ops2[k]+'1'))) C = 'numeric.ccs'+k+'MM(X,Y)';
         else C = 'NaN';
         numeric['ccs'+k+'MM'] = numeric.ccsbinop('zk = xk '+numeric.ops2[k]+'yk;');
-        numeric['ccs'+k] = numeric.Function('X','Y',
+        numeric['ccs'+k] = Function('X','Y',
                 'if(typeof X === "number") return '+A+';\n'+
                 'if(typeof Y === "number") return '+B+';\n'+
                 'return '+C+';\n'
@@ -2829,135 +2817,6 @@ numeric.Dopri.prototype.at = function at(x) {
     return this._at(x,i);
 }
 
-/*
-* params - extra argument to pass to function f. For example:
-*    var fun, num;
-*    fun = function(x, y, params) {
-*	  var a = params.a
-*	  var b = params.b
-*      return [-2 * y[0] + a, -2 * y[1] + b];
-*    };
-*    num = [1, 2];
-*	var params = {a:10, b:20}
-*   return numeric.dopri(0, 1, num, fun, params);
-*  };
-*/
-numeric.dopri_params = function dopri_params(x0,x1,y0,f,params,tol,maxit,event) {
-    if(typeof tol === "undefined") { tol = 1e-6; }
-    if(typeof maxit === "undefined") { maxit = 1000; }
-    var xs = [x0], ys = [y0], k1 = [f(x0,y0, params)], k2,k3,k4,k5,k6,k7, ymid = [];
-    var A2 = 1/5;
-    var A3 = [3/40,9/40];
-    var A4 = [44/45,-56/15,32/9];
-    var A5 = [19372/6561,-25360/2187,64448/6561,-212/729];
-    var A6 = [9017/3168,-355/33,46732/5247,49/176,-5103/18656];
-    var b = [35/384,0,500/1113,125/192,-2187/6784,11/84];
-    var bm = [0.5*6025192743/30085553152,
-              0,
-              0.5*51252292925/65400821598,
-              0.5*-2691868925/45128329728,
-              0.5*187940372067/1594534317056,
-              0.5*-1776094331/19743644256,
-              0.5*11237099/235043384];
-    var c = [1/5,3/10,4/5,8/9,1,1];
-    var e = [-71/57600,0,71/16695,-71/1920,17253/339200,-22/525,1/40];
-    var i = 0,er,j;
-    var h = (x1-x0)/10;
-    var it = 0;
-    var add = numeric.add, mul = numeric.mul, y1,erinf;
-    var max = Math.max, min = Math.min, abs = Math.abs, norminf = numeric.norminf,pow = Math.pow;
-    var any = numeric.any, lt = numeric.lt, and = numeric.and, sub = numeric.sub;
-    var e0, e1, ev;
-    var ret = new numeric.Dopri(xs,ys,k1,ymid,-1,"");
-    if(typeof event === "function") e0 = event(x0,y0);
-    while(x0<x1 && it<maxit) {
-        ++it;
-        if(x0+h>x1) h = x1-x0;
-        k2 = f(x0+c[0]*h,                add(y0,mul(   A2*h,k1[i])), params);
-        k3 = f(x0+c[1]*h,            add(add(y0,mul(A3[0]*h,k1[i])),mul(A3[1]*h,k2)),params);
-        k4 = f(x0+c[2]*h,        add(add(add(y0,mul(A4[0]*h,k1[i])),mul(A4[1]*h,k2)),mul(A4[2]*h,k3)),params);
-        k5 = f(x0+c[3]*h,    add(add(add(add(y0,mul(A5[0]*h,k1[i])),mul(A5[1]*h,k2)),mul(A5[2]*h,k3)),mul(A5[3]*h,k4)),params);
-        k6 = f(x0+c[4]*h,add(add(add(add(add(y0,mul(A6[0]*h,k1[i])),mul(A6[1]*h,k2)),mul(A6[2]*h,k3)),mul(A6[3]*h,k4)),mul(A6[4]*h,k5)),params);
-        y1 = add(add(add(add(add(y0,mul(k1[i],h*b[0])),mul(k3,h*b[2])),mul(k4,h*b[3])),mul(k5,h*b[4])),mul(k6,h*b[5]));
-        k7 = f(x0+h,y1,params);
-        er = add(add(add(add(add(mul(k1[i],h*e[0]),mul(k3,h*e[2])),mul(k4,h*e[3])),mul(k5,h*e[4])),mul(k6,h*e[5])),mul(k7,h*e[6]));
-        if(typeof er === "number") erinf = abs(er);
-        else erinf = norminf(er);
-        if(erinf > tol) { // reject
-            h = 0.2*h*pow(tol/erinf,0.25);
-            if(x0+h === x0) {
-                ret.msg = "Step size became too small";
-                break;
-            }
-            continue;
-        }
-        ymid[i] = add(add(add(add(add(add(y0,
-                mul(k1[i],h*bm[0])),
-                mul(k3   ,h*bm[2])),
-                mul(k4   ,h*bm[3])),
-                mul(k5   ,h*bm[4])),
-                mul(k6   ,h*bm[5])),
-                mul(k7   ,h*bm[6]));
-        ++i;
-        xs[i] = x0+h;
-        ys[i] = y1;
-        k1[i] = k7;
-        if(typeof event === "function") {
-            var yi,xl = x0,xr = x0+0.5*h,xi;
-            e1 = event(xr,ymid[i-1]);
-            ev = and(lt(e0,0),lt(0,e1));
-            if(!any(ev)) { xl = xr; xr = x0+h; e0 = e1; e1 = event(xr,y1); ev = and(lt(e0,0),lt(0,e1)); }
-            if(any(ev)) {
-                var xc, yc, en,ei;
-                var side=0, sl = 1.0, sr = 1.0;
-                while(1) {
-                    if(typeof e0 === "number") xi = (sr*e1*xl-sl*e0*xr)/(sr*e1-sl*e0);
-                    else {
-                        xi = xr;
-                        for(j=e0.length-1;j!==-1;--j) {
-                            if(e0[j]<0 && e1[j]>0) xi = min(xi,(sr*e1[j]*xl-sl*e0[j]*xr)/(sr*e1[j]-sl*e0[j]));
-                        }
-                    }
-                    if(xi <= xl || xi >= xr) break;
-                    yi = ret._at(xi, i-1);
-                    ei = event(xi,yi);
-                    en = and(lt(e0,0),lt(0,ei));
-                    if(any(en)) {
-                        xr = xi;
-                        e1 = ei;
-                        ev = en;
-                        sr = 1.0;
-                        if(side === -1) sl *= 0.5;
-                        else sl = 1.0;
-                        side = -1;
-                    } else {
-                        xl = xi;
-                        e0 = ei;
-                        sl = 1.0;
-                        if(side === 1) sr *= 0.5;
-                        else sr = 1.0;
-                        side = 1;
-                    }
-                }
-                y1 = ret._at(0.5*(x0+xi),i-1);
-                ret.f[i] = f(xi,yi,params);
-                ret.x[i] = xi;
-                ret.y[i] = yi;
-                ret.ymid[i-1] = y1;
-                ret.events = ev;
-                ret.iterations = it;
-                return ret;
-            }
-        }
-        x0 += h;
-        y0 = y1;
-        e0 = e1;
-        h = min(0.8*h*pow(tol/erinf,0.25),4*h);
-    }
-    ret.iterations = it;
-    return ret;
-}
-
 numeric.dopri = function dopri(x0,x1,y0,f,tol,maxit,event) {
     if(typeof tol === "undefined") { tol = 1e-6; }
     if(typeof maxit === "undefined") { maxit = 1000; }
@@ -3133,7 +2992,7 @@ numeric.LUsolve = function LUsolve(LUP, b) {
   var n   = LU.length;
   var x = numeric.clone(b);
   var P   = LUP.P;
-  var Pi, LUi, LUii;
+  var Pi, LUi, LUii, tmp;
 
   for (i=n-1;i!==-1;--i) x[i] = b[i];
   for (i = 0; i < n; ++i) {
@@ -3191,71 +3050,73 @@ numeric.echelonize = function echelonize(A) {
     return {I:I, A:A, P:P};
 }
 
-numeric._solveLP = function _solveLP(c,A,b,tol,maxit,x) {
+numeric.__solveLP = function __solveLP(c,A,b,tol,maxit,x,flag) {
     var sum = numeric.sum, log = numeric.log, mul = numeric.mul, sub = numeric.sub, dot = numeric.dot, div = numeric.div, add = numeric.add;
     var m = c.length, n = b.length,y;
     var unbounded = false, cb,i0=0;
-    if(typeof tol === "undefined") tol = numeric.epsilon;
-    if(typeof maxit === "undefined") maxit = 1000;
-    if(typeof x === "undefined") {
-        var c0 = numeric.rep([m],0).concat([1]);
-        var J = numeric.rep([n,1],-1);
-        var A0 = numeric.blockMatrix([[A                   ,   J  ]]);
-        var b0 = b;
-        y = numeric.rep([m],0).concat(Math.max(0,numeric.sup(numeric.neg(b)))+1);
-        var x0 = _solveLP(c0,A0,b0,tol,maxit,y);
-        x = numeric.clone(x0.solution);
-        x.length = m;
-        var foo = numeric.inf(sub(b,dot(A,x)));
-        if(foo<0) { return { solution: NaN, message: "Infeasible", iterations: x0.iterations }; }
-        i0 = x0.iterations;
-        cb = function cb(it,x0,f0,g0,H1) {
-            var s = dot(c,g0), Ag0 = dot(A,g0),i;
-            for(i=n-1;i!==-1;--i) if(s*Ag0[i]<0) return false;
-            unbounded = true; 
-            return true;
-        };
-    } else {
-        cb = function cb(it,x0,f0,g0,H1) {
-            if(x0[m-1]>=0) return false;
-            unbounded = true;
-            return true;
-        };
-    }
     var alpha = 1.0;
-    var f0,df0,AT = numeric.transpose(A), svd = numeric.svd,transpose = numeric.transpose,leq = numeric.leq;
+    var f0,df0,AT = numeric.transpose(A), svd = numeric.svd,transpose = numeric.transpose,leq = numeric.leq, sqrt = Math.sqrt, abs = Math.abs;
     var muleq = numeric.muleq;
     var norm = numeric.norminf, any = numeric.any,min = Math.min;
-    alpha = 1;
+    var all = numeric.all, gt = numeric.gt;
     var p = Array(m), A0 = Array(n),e=numeric.rep([n],1), H;
     var solve = numeric.solve, z = sub(b,dot(A,x)),count;
+    var dotcc = dot(c,c);
     for(count=i0;count<maxit;++count) {
         var i,j,d;
         for(i=n-1;i!==-1;--i) A0[i] = div(A[i],z[i]);
         var A1 = transpose(A0);
-        for(i=m-1;i!==-1;--i) p[i] = (x[i]+sum(A1[i]));
-        alpha = 0.25*Math.abs(dot(c,c)/dot(c,p));
+        for(i=m-1;i!==-1;--i) p[i] = (/*x[i]+*/sum(A1[i]));
+        alpha = 0.25*abs(dotcc/dot(c,p));
+        var a1 = 100*sqrt(dotcc/dot(p,p));
+        if(!isFinite(alpha) || alpha>a1) alpha = a1;
         g = add(c,mul(alpha,p));
         H = dot(A1,A0);
         for(i=m-1;i!==-1;--i) H[i][i] += 1;
-        H = mul(H,alpha);
-        d = solve(H,g,true);
+        d = solve(H,div(g,alpha),true);
         var t0 = div(z,dot(A,d));
         var t = 1.0;
         for(i=n-1;i!==-1;--i) if(t0[i]<0) t = min(t,-0.999*t0[i]);
         y = sub(x,mul(d,t));
         z = sub(b,dot(A,y));
-        if(any(leq(z,0))) return { solution: x, message: "", iterations: count };
+        if(!all(gt(z,0))) return { solution: x, message: "", iterations: count };
         x = y;
         if(alpha<tol) return { solution: y, message: "", iterations: count };
-        cb(0,x,0,g,H);
+        if(flag) {
+            var s = dot(c,g), Ag = dot(A,g);
+            unbounded = true;
+            for(i=n-1;i!==-1;--i) if(s*Ag[i]<0) { unbounded = false; break; }
+        } else {
+            if(x[m-1]>=0) unbounded = false;
+            else unbounded = true;
+        }
         if(unbounded) return { solution: y, message: "Unbounded", iterations: count };
     }
     return { solution: x, message: "maximum iteration count exceeded", iterations:count };
+}
+
+numeric._solveLP = function _solveLP(c,A,b,tol,maxit) {
+    var m = c.length, n = b.length,y;
+    var sum = numeric.sum, log = numeric.log, mul = numeric.mul, sub = numeric.sub, dot = numeric.dot, div = numeric.div, add = numeric.add;
+    var c0 = numeric.rep([m],0).concat([1]);
+    var J = numeric.rep([n,1],-1);
+    var A0 = numeric.blockMatrix([[A                   ,   J  ]]);
+    var b0 = b;
+    var y = numeric.rep([m],0).concat(Math.max(0,numeric.sup(numeric.neg(b)))+1);
+    var x0 = numeric.__solveLP(c0,A0,b0,tol,maxit,y,false);
+    var x = numeric.clone(x0.solution);
+    x.length = m;
+    var foo = numeric.inf(sub(b,dot(A,x)));
+    if(foo<0) { return { solution: NaN, message: "Infeasible", iterations: x0.iterations }; }
+    var ret = numeric.__solveLP(c, A, b, tol, maxit-x0.iterations, x, true);
+    ret.iterations += x0.iterations;
+    return ret;
 };
 
 numeric.solveLP = function solveLP(c,A,b,Aeq,beq,tol,maxit) {
-    if(typeof Aeq === "undefined") return numeric._solveLP(c,A,b,tol,maxit,x);
+    if(typeof maxit === "undefined") maxit = 1000;
+    if(typeof tol === "undefined") tol = numeric.epsilon;
+    if(typeof Aeq === "undefined") return numeric._solveLP(c,A,b,tol,maxit);
     var m = Aeq.length, n = Aeq[0].length, o = A.length;
     var B = numeric.echelonize(Aeq);
     var flags = numeric.rep([n],0);
