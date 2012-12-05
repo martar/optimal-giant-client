@@ -16,15 +16,11 @@
   };
 
   getCurveCoordinates = function(timeSteep, endPoint, skier, granulation) {
-    var kappa, t0, t1, x;
+    var kappa, x;
     kappa = skier.computeKappa(endPoint);
-    t0 = 0;
     while (!skier.isNear(endPoint)) {
-      t1 = t0 + timeSteep;
-      skier.move(t0, t1, kappa, 1);
-      t0 = t1;
+      skier.move(timeSteep, kappa, 1);
     }
-    skier.result = t0;
     return ((function() {
       var _i, _len, _ref, _results, _step;
       _ref = skier.getPositions();
@@ -42,43 +38,23 @@
   };
 
   self.onmessage = function(ev) {
-    var endPoint, kappa, lol, pos, skier, skier2, skier3, skiers, start, startPoint, steep, steepPositions, t0, t1, tt0, tt1, v, vcoord, vstart, _i, _len;
+    var endPoint, kappa, lol, pos, skier, skier2, skier3, skiers, start, startPoint, steep, steepPositions, vcoord, vstart, _i, _len;
     start = Date.now();
-    vstart = [1, 10];
+    vstart = [0, 0.001];
     startPoint = [0, 0];
     skier = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = startPoint, this.v0 = vstart);
     steep = 0.001;
-    t0 = 0;
-    endPoint = [50, 50];
-    steepPositions = getCurveCoordinates(steep, endPoint, skier, 2400);
+    endPoint = [10, 10];
+    steepPositions = getCurveCoordinates(steep, endPoint, skier, 1000);
     skier2 = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = startPoint, this.v0 = vstart);
-    kappa = 0.000001;
-    t0 = 0;
     for (_i = 0, _len = steepPositions.length; _i < _len; _i++) {
       pos = steepPositions[_i];
-      t1 = t0 + steep;
-      v = findCoords((pos[1] - skier2.getPositions()[0][1]) / (pos[0] - skier2.getPositions()[0][0]), vectorDistance(skier2.getVelocities()[0]));
-      skier2.moveWithArbitraryV(v, t0, t1, kappa, 1);
-      tt0 = 0;
-      while (!skier2.isNear(pos)) {
-        tt1 = tt0 + steep;
-        skier2.move(tt0, tt1, kappa, 1);
-        tt0 = tt1;
-      }
-      t0 = t1 + tt0;
+      skier2.moveStraightToPoint(pos, steep);
     }
-    skier2.result = t0;
     vcoord = vectorDistance(vstart) / 1.42;
     skier3 = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = startPoint, this.v0 = [vcoord, vcoord]);
-    steep = 0.01;
-    t0 = 0;
-    kappa = 0.00001;
-    while (!skier3.isNear(endPoint)) {
-      t1 = t0 + steep;
-      skier3.move(t0, t1, kappa, 1);
-      t0 = t1;
-    }
-    skier3.result = t0;
+    kappa = 0.000001;
+    skier3.moveToPoint(endPoint, steep, kappa, 1);
     skier3.color = "blue";
     skiers = [];
     skier.color = "red";
@@ -93,7 +69,8 @@
         _results.push({
           time: skier.result,
           positions: skier.getPositions(),
-          color: skier.color
+          color: skier.color,
+          diff: skier.positions[0]
         });
       }
       return _results;

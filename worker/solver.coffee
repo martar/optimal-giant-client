@@ -20,8 +20,22 @@ g = 9.80665 # standard acceleration of free fall
 B = 4 #  boundary value (in m/s) from with air drag becomes proportional to the square of the velocity
 #k1 = 0.05 # out of space driven value
 k1 = 0
-alfa = pi/6
+alfa = pi/12
 
+'''
+finds the coordinates from the length of the vector and 
+tan angle of inclination of the velocity vector
+'''
+findCoords = (vProp, length) -> 
+	coor = []
+	coor.push(length/(Math.sqrt(1+vProp*vProp)))
+	coor.push(vProp*length/(Math.sqrt(1+vProp*vProp)))
+	coor
+		
+
+vectorDistance = (vector) ->
+	Math.sqrt( Math.pow(vector[0],2) + Math.pow(vector[1],2))
+	
 class Skier
 	"""
 	C - drag coefficient, typical values (0.4 - 1)
@@ -34,17 +48,63 @@ class Skier
 		@positions = [x0]
 		@result = 0
 	
-	move: (t0, t1, kappa, sign_omega = 1) ->
-		result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, sign_omega, this).y
-		[xx, xy, vx, vy] =result[result.length-1]
+	reset : () ->
+		@velocities = [@velocities[@velocities.length-1]]
+		@positions = [@positions[@positions-1]]
+		@result = 0
+		
+	whatIsMyResult : (endPoint, result) ->
+		[xEnd, yEnd] = endPoint
+		lastIndex = result.y.length-1
+		reachedDestination = false
+		# TODO can do binary search
+		for resultYSteep, index in result.y
+			[xx, xy, vx, vy] =resultYSteep
+			if (xx > xEnd or xy > yEnd)
+				lastIndex = index
+				reachedDestination = true
+				break
+		[xx, xy, vx, vy] =result.y[lastIndex]
 		@positions.unshift [xx, xy]
 		@velocities.unshift [vx, vy]
+		# update the result in a skier - how much time the movement took
+		@result = result.x[lastIndex]
+		reachedDestination
+	
 
-	moveWithArbitraryV: (v, t0, t1, kappa, sign_omega = 1) ->
-		result = @solver.solve(t0,t1,@positions[0], v, kappa, sign_omega, this).y
-		[xx, xy, vx, vy] =result[result.length-1]
-		@positions.unshift [xx, xy]
-		@velocities.unshift [vx, vy]
+	###
+	Move the skier to the endPoint. It is not confirmed that the skier really 
+	managed to reach the proximity of that point
+	###
+	moveToPoint : (endPoint, steep, kappa, sign_omega = 1) ->
+		reachedDestination = false
+		while !reachedDestination
+			reachedDestination = @move(steep, kappa, endPoint, sign_omega)
+		
+			
+	moveStraightToPoint : (endPoint, steep, sign_omega = 1) ->
+		reachedDestination = false
+		kappa = 0.0001
+		while !reachedDestination
+			v =findCoords( (endPoint[1] - @positions[0][1])/(endPoint[0] - @positions[0][0]), vectorDistance(@velocities[0]))
+			reachedDestination = @moveWithArbitraryV(v, steep, kappa, endPoint, sign_omega)
+			
+	move: (steep, kappa, endPoint, sign_omega = 1) ->
+		result = @solver.solve(@result,@result+steep,@positions[0], @velocities[0], kappa, sign_omega, this)
+		console.log result.at([0.7])
+		console.log result
+		@whatIsMyResult(endPoint, result)
+
+	###
+	just show the result, without any sideeffect and changing state of the skier
+	###
+	moveDebug: (steep, kappa, endPoint, sign_omega = 1) ->
+		@solver.solve(@result,@result+steep,@positions[0], @velocities[0], kappa, sign_omega, this)
+		
+	moveWithArbitraryV: (v, steep, kappa, endPoint, sign_omega = 1) ->
+		result = @solver.solve(@result,@result+steep,@positions[0], v, kappa, sign_omega, this)
+		@whatIsMyResult(endPoint, result)
+		
 	'''
 	Check if we are in the closest point to the endPoint
 	It is the condition to stop simulation
@@ -149,4 +209,33 @@ while !skier.isNear(endPoint)
   t0 = t1
 duration = Date.now() - start
 '''
-                 
+###
+getCurveCoordinates = (timeSteep, endPoint, skier, granulation) ->
+	kappa = skier.computeKappa(endPoint)
+	t0 = 0
+	while !skier.isNear(endPoint)
+		skier.move(timeSteep, kappa, endPoint, 1)
+
+	(x for x in skier.getPositions() by granulation).reverse()
+	
+vstart = [1,10]
+startPoint = [0,0]
+skier = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new Solver, @x0=startPoint, @v0=vstart)
+steep = 1
+t0 = 0
+endPoint = [50,50]
+
+# steepPositions = getCurveCoordinates(steep, endPoint, skier, 100)
+skier2 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new Solver, @x0=startPoint, @v0=vstart)
+kappa = 0.000001
+
+#skier2.moveStraightToPoint(steepPositions[1], steep)
+result = skier2.moveDebug(steep, kappa, endPoint)
+console.log result
+console.log "------"
+console.log result.at([0.7])
+console.log "------"
+skier2.reset()
+result = skier2.moveDebug(0.7, kappa, endPoint) 
+console.log result
+###         

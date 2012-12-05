@@ -2,7 +2,7 @@
 (function() {
   'this is a hack that enables the usage of this script in both: the browser via Web Workers or in Node.js';
 
-  var B, Skier, Solver, alfa, cos, g, k1, lib, mag, pi, root, sin, sqrt, square,
+  var B, Skier, Solver, alfa, cos, endPoint, findCoords, g, getCurveCoordinates, k1, kappa, lib, mag, pi, pos, root, sin, skier, skier2, sqrt, square, startPoint, steep, steepPositions, t0, v, vectorDistance, vstart, _i, _len,
     _this = this,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -39,7 +39,7 @@
 
   B = 4;
 
-  k1 = 0.05;
+  k1 = 0;
 
   alfa = pi / 6;
 
@@ -61,26 +61,44 @@
       this.result = 0;
     }
 
-    Skier.prototype.move = function(t0, t1, kappa, sign_omega) {
-      var result, vx, vy, xx, xy, _ref;
-      if (sign_omega == null) {
-        sign_omega = 1;
+    Skier.prototype.whatIsMyResult = function(endPoint, result) {
+      var index, lastIndex, reachedDestination, resultYSteep, vx, vy, xEnd, xx, xy, yEnd, _i, _len, _ref, _ref1;
+      xEnd = endPoint[0], yEnd = endPoint[1];
+      lastIndex = result.y.length - 1;
+      reachedDestination = false;
+      _ref = result.y;
+      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+        resultYSteep = _ref[index];
+        xx = resultYSteep[0], xy = resultYSteep[1], vx = resultYSteep[2], vy = resultYSteep[3];
+        if (xx > xEnd || xy > yEnd) {
+          lastIndex = index;
+          reachedDestination = true;
+          break;
+        }
       }
-      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, sign_omega, this).y;
-      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
+      _ref1 = result.y[lastIndex], xx = _ref1[0], xy = _ref1[1], vx = _ref1[2], vy = _ref1[3];
       this.positions.unshift([xx, xy]);
-      return this.velocities.unshift([vx, vy]);
+      this.velocities.unshift([vx, vy]);
+      this.result = result.x[lastIndex];
+      return reachedDestination;
     };
 
-    Skier.prototype.moveWithArbitraryV = function(v, t0, t1, kappa, sign_omega) {
-      var result, vx, vy, xx, xy, _ref;
+    Skier.prototype.move = function(t0, t1, kappa, endPoint, sign_omega) {
+      var result;
       if (sign_omega == null) {
         sign_omega = 1;
       }
-      result = this.solver.solve(t0, t1, this.positions[0], v, kappa, sign_omega, this).y;
-      _ref = result[result.length - 1], xx = _ref[0], xy = _ref[1], vx = _ref[2], vy = _ref[3];
-      this.positions.unshift([xx, xy]);
-      return this.velocities.unshift([vx, vy]);
+      result = this.solver.solve(t0, t1, this.positions[0], this.velocities[0], kappa, sign_omega, this);
+      return this.whatIsMyResult(endPoint, result);
+    };
+
+    Skier.prototype.moveWithArbitraryV = function(v, steep, kappa, endPoint, sign_omega) {
+      var result;
+      if (sign_omega == null) {
+        sign_omega = 1;
+      }
+      result = this.solver.solve(this.result, this.result + steep, this.positions[0], v, kappa, sign_omega, this);
+      return this.whatIsMyResult(endPoint, result);
     };
 
     'Check if we are in the closest point to the endPoint\nIt is the condition to stop simulation';
@@ -125,7 +143,7 @@
   })();
 
   Solver = (function() {
-    var compute_sin_cos_beta, vectorfield,
+    var compute_sin_cos_beta, movementEquasion,
       _this = this;
 
     function Solver() {
@@ -147,7 +165,7 @@
       return [sin_beta, cos_beta];
     };
 
-    vectorfield = function(t, v, params) {
+    movementEquasion = function(t, v, params) {
       var N, cosinus, f, f_R, f_r, kappa, sign_omega, sinus, skier, vl, vx, vy, _, _ref;
       _ = v[0], _ = v[1], vx = v[2], vy = v[3];
       _ref = [params.skier, params.kappa, params.sinus, params.cosinus, params.sign_omega], skier = _ref[0], kappa = _ref[1], sinus = _ref[2], cosinus = _ref[3], sign_omega = _ref[4];
@@ -201,7 +219,9 @@
         cosinus: cosinus,
         sign_omega: sign_omega
       };
-      return lib.numeric.dopri_params(start, end, [x0[0], x0[1], v0[0], v0[1]], vectorfield, params);
+      return lib.numeric.dopri(start, end, [x0[0], x0[1], v0[0], v0[1]], function(t, v) {
+        return movementEquasion(t, v, params);
+      });
     };
 
     return Solver;
@@ -218,5 +238,71 @@
 
   'start = Date.now()                                                                    \nsteep = 0.01\nt0 = 0\nskier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0,19])\n\nendPoint = [1,4]\nkappa = skier.computeKappa(endPoint)\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nconsole.log skier.getPosition()\nendPoint = [5,5]\nkappa = skier.computeKappa(endPoint)\nconsole.log kappa, t0\n\nwhile !skier.isNear(endPoint)\n  t1 = t0+steep\n  skier.move(t0, t1, kappa)\n  t0 = t1\nduration = Date.now() - start';
 
+
+  vectorDistance = function(vector) {
+    return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));
+  };
+
+  findCoords = function(vProp, length) {
+    var coor;
+    coor = [];
+    coor.push(length / (Math.sqrt(1 + vProp * vProp)));
+    coor.push(vProp * length / (Math.sqrt(1 + vProp * vProp)));
+    return coor;
+  };
+
+  getCurveCoordinates = function(timeSteep, endPoint, skier, granulation) {
+    var kappa, t0, t1, x;
+    kappa = skier.computeKappa(endPoint);
+    t0 = 0;
+    while (!skier.isNear(endPoint)) {
+      t1 = t0 + timeSteep;
+      skier.move(t0, t1, kappa, pos);
+      t0 = t1;
+    }
+    skier.result = t0;
+    return ((function() {
+      var _i, _len, _ref, _results, _step;
+      _ref = skier.getPositions();
+      _results = [];
+      for (_i = 0, _len = _ref.length, _step = granulation; _i < _len; _i += _step) {
+        x = _ref[_i];
+        _results.push(x);
+      }
+      return _results;
+    })()).reverse();
+  };
+
+  vstart = [1, 10];
+
+  startPoint = [0, 0];
+
+  skier = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new Solver, this.x0 = startPoint, this.v0 = vstart);
+
+  steep = 0.001;
+
+  t0 = 0;
+
+  endPoint = [50, 50];
+
+  steepPositions = getCurveCoordinates(steep, endPoint, skier, 100);
+
+  skier2 = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new Solver, this.x0 = startPoint, this.v0 = vstart);
+
+  kappa = 0.000001;
+
+  t0 = 0;
+
+  for (_i = 0, _len = steepPositions.length; _i < _len; _i++) {
+    pos = steepPositions[_i];
+    v = findCoords((pos[1] - skier2.getPositions()[0][1]) / (pos[0] - skier2.getPositions()[0][0]), vectorDistance(skier2.getVelocities()[0]));
+    skier2.moveWithArbitraryV(v, steep, kappa, pos, 1);
+    console.log(skier2.result);
+    while (!skier2.isNear(pos)) {
+      console.log(skier2.result);
+      skier2.move(skier2.result, skier2.result + steep, kappa, pos, 1);
+    }
+    console.log("-----------------");
+  }
 
 }).call(this);
