@@ -1,13 +1,10 @@
-lib = {}
+importScripts './underscore.js'
+importScripts './solver.js'	
 
-try
-	importScripts './underscore.js'
-	importScripts './solver.js'	
-catch error
-	''
-	"""_ = require('./underscore.js')
-	require('./solver.js')
-	"""
+"""
+_ = require('./underscore.js')
+require('./solver.js')
+"""
 	
 class Turns	
 	constructor: (count,val,endPoint) ->
@@ -155,7 +152,9 @@ class Optimization
 			@popul.idvs = @popul.idvs[0..(@size-1)]
 			
 			i+=1
+		
 			theBest = @popul.idvs[0]
+			#console.log "theBest:", theBest
 		return bestResults
 	
 	'''
@@ -176,6 +175,7 @@ class Optimization
 			# 1/mutationProb chance for mutation
 			ifMut = Math.floor(Math.random()*@mutationProb)
 			if ifMut%@mutationProb==0
+				# +- 10% change
 				mutIds.push(ind.mutate(10))
 		mutIds
 	
@@ -189,6 +189,7 @@ class Optimization
 
 @Turns = Turns
 @Optimization = Optimization
+@Individual = Individual
 
 '''
 pop = new Turns(10,10,[4,5])

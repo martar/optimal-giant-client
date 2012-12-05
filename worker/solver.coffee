@@ -16,11 +16,12 @@ sqrt = Math.sqrt
 square = (x) => x*x
 mag = ( [x,y]) => Math.sqrt(square(x) + square(y))
 g = 9.80665 # standard acceleration of free fall
-
+g = 9.81
 B = 4 #  boundary value (in m/s) from with air drag becomes proportional to the square of the velocity
 k1 = 0.05 # out of space driven value
-
-alfa = pi/6
+# TODO only for test
+k1 = 0
+alfa = pi/12 # pi/6
 
 class Skier
 	"""
@@ -33,6 +34,7 @@ class Skier
 		@velocities = [v0]
 		@positions = [x0]
 		@result = 0
+		@min = 10000
 	
 	move: (t0, t1, kappa, sign_omega = 1) ->
 		result = @solver.solve(t0,t1,@positions[0], @velocities[0], kappa, sign_omega, this).y
@@ -50,26 +52,32 @@ class Skier
 	It is the condition to stop simulation
 	'''
 	isNear: (endPoint) ->
-		min = 0.1
-		x = @positions[0]
+		x = @getPositions()[0]
 		rKw = Math.pow(x[0] - endPoint[0], 2) + Math.pow(x[1] - endPoint[1], 2) 
-		return rKw < min || x[0] > endPoint[0]
 
+		if rKw < @min
+			@min = rKw
+			return false
+		@min = 10000
+		return true
 	
 	'''
 	Compute new kappa basing on set points and velocity vector
 	'''
 	computeKappa: (endPoint) ->
 		[x1,y1] = @positions[0] # start point
+		[x,y] = @getCircleCenter(endPoint)
+		kappa = 1 / (Math.sqrt(Math.pow((x1-x),2)+Math.pow((y1-y),2)))
+		kappa
+	
+	getCircleCenter: (endPoint) ->
+		[x1,y1] = @positions[0] # start point
 		[x2,y2] = endPoint
 		[vx,vy] = @velocities[0]
 		
 		x = (Math.pow((y2-y1),2)*vy - 2*vx*x1*(y2-y1) + (Math.pow(x2,2) - Math.pow(x1,2))*vy)/(2*(-vx*(y2-y1) + vy*(x2-x1)))
 		y = (-vx*(Math.pow((y2-y1),2) + (Math.pow(x2,2) - Math.pow(x1,2))))/(2*(-vx*(y2-y1) + vy*(x2-x1))) + y1
-		
-		kappa = 1 / (Math.sqrt(Math.pow((x1-x),2)+Math.pow((y1-y),2)))
-		kappa
-	
+		[x,y]
 	
 	getPosition: () ->
 		@positions[0]
