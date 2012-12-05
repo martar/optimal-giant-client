@@ -106,13 +106,16 @@ class PointsSet extends evol.Individual
 		new PointsSet(changedPoints, new solver.Skier(0, null, 0, 0, null, x0=[firstPos[0], firstPos[1] ],v0=[firstVel[0],firstVel[1]]))
 		
 	mutate: (percentValue) ->
-		# do not change endPoint
-		ind = Math.floor(Math.random()*(@value.length-1))
-		
+		indCount = Math.floor(Math.random()*(@value.length-1))
+
 		# deep copy
 		newValue = ([i[0],i[1]] for i in @value)
 		
-		newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
+		for i in [1..indCount]
+			# do not change endPoint
+			ind = Math.floor(Math.random()*(@value.length-1))
+		
+			newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
 		
 		@createCopy(newValue)
 		
