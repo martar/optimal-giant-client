@@ -16,11 +16,12 @@ sqrt = Math.sqrt
 square = (x) => x*x
 mag = ( [x,y]) => Math.sqrt(square(x) + square(y))
 g = 9.80665 # standard acceleration of free fall
-
+g = 9.81
 B = 4 #  boundary value (in m/s) from with air drag becomes proportional to the square of the velocity
 k1 = 0.05 # out of space driven value
-
+k1 = 0
 alfa = pi/6
+alfa = pi/12
 
 class Skier
 	"""
