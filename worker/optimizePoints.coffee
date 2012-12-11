@@ -15,7 +15,7 @@ evol = require('./evolutionAlgorithm.js')
 	
 findCoords = (value,length) ->
 	coor = []
-	vProp = value
+	vProp = Math.tan(value)
 	
 	coor.push(length/(Math.sqrt(1+vProp*vProp)))
 	coor.push(vProp*length/(Math.sqrt(1+vProp*vProp)))
@@ -27,8 +27,6 @@ class PointTurns
 		propEnd = (@endPoint[1]-@startPoint[1])/(@endPoint[0] - @startPoint[0])
 		x = Math.atan(propEnd)
 		
-		#CHECK!!!!!! sth wrong!!
-		
 		# znajdz punkty dla randomowych prêdkoœci i stwórz pierwsze obiekty populacji
 		randomAngles = (Math.random()* (Math.PI/2 - Math.abs(x)) + Math.abs(x) for i in [1..count])
 		
@@ -37,7 +35,9 @@ class PointTurns
 		@idvs = []
 		for angle in randomAngles
 			skier = new solver.Skier(0,null,0,0,null,x0=@startPoint,v0 = findCoords(angle,val))
-			points = @getPoints(1/(skier.computeKappa(@endPoint)),skier.getCircleCenter(@endPoint))
+			kappa = skier.computeKappa(@endPoint)
+			center = skier.getCircleCenter(@endPoint)
+			points = @getPoints(1/kappa,center)
 			@idvs.push(new PointsSet(points,skier))
 		
 	getPoints: (R,center) ->
@@ -73,12 +73,12 @@ class PointsSet extends evol.Individual
 	computeFitness: () ->
 		if @fitness
 			return @fitness
-		interval = 0.001
+		interval = 0.1
 		t = 0
 		@min = 100000
 
 		for nextPos in @value
-			@skier.moveStraightToPoint(interval, nextPos)
+			@skier.moveStraightToPoint(interval, nextPos, 0.001)
 		#console.log "czas: ", t
 		@fitness = @skier.result
 		
@@ -98,10 +98,18 @@ class PointsSet extends evol.Individual
 		
 		for i in [1..indCount]
 			# do not change endPoint
-			ind = Math.floor(Math.random()*(@value.length-1))
+			ind = Math.floor(Math.random()*(@value.length-2))
 		
+			# change +- percentValue percent
 			newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
-		
+			'''while ( (ind>0 && newValue[ind][1] < newValue[ind-1][1]) || newValue[ind][1] > newValue[ind+1][1] || (ind==0 && newValue[ind][1]<@skier.positions[0][1]))
+				newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
+			'''
+			# find new random if the skier must ride up the slope
+			if ind>0 and (newValue[ind][1]>newValue[ind+1][1] or newValue[ind][1]<newValue[ind-1][1])
+				diff = Math.random()*(newValue[ind+1][1] - newValue[ind-1][1]) - (newValue[ind][1] - newValue[ind-1][1])
+				newValue[ind][1] = newValue[ind][1] + diff
+			
 		@createCopy(newValue)
 		
 	cross: (b) ->
@@ -109,7 +117,7 @@ class PointsSet extends evol.Individual
 
 @PointTurns = PointTurns
 
-'''
+"""
 pop = new PointTurns(1,20,1,[10,10])
 #console.log "nowa populacja:"
 for i in pop.idvs.reverse()
@@ -123,4 +131,4 @@ for i in pop.idvs.reverse()
 b = new evol.Optimization(pop,20,5).compute()
 console.log (i.fitness for i in pop.idvs.reverse())
 console.log b
-'''
+"""

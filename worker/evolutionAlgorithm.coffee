@@ -1,3 +1,4 @@
+
 importScripts './underscore.js'
 importScripts './solver.js'	
 
@@ -122,7 +123,6 @@ class Optimization
 	'''
 	constructor: (@popul,@nrOfCrossed,@mutationProb) ->
 		@size = @popul.idvs.length
-	
 	'''
 	The core function which mainpulates the population to find the best individual
 	'''
@@ -152,9 +152,10 @@ class Optimization
 			@popul.idvs = @popul.idvs[0..(@size-1)]
 			
 			i+=1
-		
-			theBest = @popul.idvs[0]
-			#console.log "theBest:", theBest
+			
+			theBest = @popul.idvs[0].fitness
+			theWorst = @popul.idvs[@size-1].fitness
+			[theBest,theWorst]
 		return bestResults
 	
 	'''
@@ -162,7 +163,9 @@ class Optimization
 	'''
 	crossPop: () ->
 		newInd = []
-		for it in [0..@nrOfCrossed]
+		if @nrOfCrossed < 1
+			return newInd
+		for it in [1..@nrOfCrossed]
 			i = Math.floor(Math.random()*@size)
 			j = Math.floor(Math.random()*@size)
 			a = @popul.idvs[i].cross(@popul.idvs[j])
@@ -185,8 +188,8 @@ class Optimization
 	stop: () ->
 		theWorst = @popul.idvs[@size-1]
 		theBest = @popul.idvs[0]
-		Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness < 0.001
-
+		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.0001
+		
 @Turns = Turns
 @Optimization = Optimization
 @Individual = Individual

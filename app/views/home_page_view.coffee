@@ -14,13 +14,15 @@ module.exports = class HomePageView extends PageView
 		for skier in data.skiers
 			skier.color ?= "black"
 			@context.strokeStyle = skier.color
-			for pair in skier.positions
-				x = Math.round (pair[0]*10)
-				y = Math.round (pair[1]*10)
-				@context.beginPath()
-				@context.moveTo x,y
-				@context.lineTo x+1, y+1
-				@context.stroke()
+			@context.beginPath()
+			@context.moveTo skier.positions[0][0],skier.positions[0][1]
+			for pair in skier.positions[0..]
+				x = Math.round (pair[0]*30 + 5)
+				y = Math.round (pair[1]*30 + 5)
+				@context.lineTo x, y
+				
+			@context.closePath()
+			@context.stroke()
   
 	renderResults: (data) -> 
 		for skier in data.skiers
