@@ -919,13 +919,14 @@ window.require.define({"views/home_page_view": function(exports, require, module
 
     HomePageView.prototype.afterRender = function() {
       HomePageView.__super__.afterRender.apply(this, arguments);
-      this.context = this.$('#slope').get(0).getContext('2d');
+      this.canvas = this.$('#slope').get(0);
+      this.context = this.canvas.getContext('2d');
       this.worker = new Worker('javascripts/turnWorker.js');
       return this.work();
     };
 
     HomePageView.prototype.draw = function(data) {
-      var pair, skier, x, y, _i, _len, _ref, _ref1, _results;
+      var pair, skier, x, y, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
       _ref = data.skiers;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -934,21 +935,17 @@ window.require.define({"views/home_page_view": function(exports, require, module
           skier.color = "black";
         }
         this.context.strokeStyle = skier.color;
-        _results.push((function() {
-          var _j, _len1, _ref2, _results1;
-          _ref2 = skier.positions;
-          _results1 = [];
-          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-            pair = _ref2[_j];
-            x = Math.round(pair[0] * 10);
-            y = Math.round(pair[1] * 10);
-            this.context.beginPath();
-            this.context.moveTo(x, y);
-            this.context.lineTo(x + 1, y + 1);
-            _results1.push(this.context.stroke());
-          }
-          return _results1;
-        }).call(this));
+        this.context.beginPath();
+        this.context.moveTo(skier.positions[0][0], skier.positions[0][1]);
+        _ref2 = skier.positions.slice(0);
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          pair = _ref2[_j];
+          x = Math.round(pair[0] * 30 + 5);
+          y = Math.round(pair[1] * 30 + 5);
+          this.context.lineTo(x, y);
+        }
+        this.context.closePath();
+        _results.push(this.context.stroke());
       }
       return _results;
     };
@@ -970,9 +967,26 @@ window.require.define({"views/home_page_view": function(exports, require, module
     HomePageView.prototype.work = function() {
       var _this = this;
       this.worker.onmessage = function(event) {
-        _this.draw(event.data);
-        console.log(event.data);
-        return _this.renderResults(event.data);
+        var pair, x, y, _i, _len, _ref;
+        if (event.data.type === 'final') {
+          _this.draw(event.data);
+          console.log(event.data);
+          return _this.renderResults(event.data);
+        } else {
+          _this.context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
+          _this.context.beginPath();
+          _this.context.moveTo(event.data.best[0][0], event.data.best[0][1]);
+          _ref = event.data.best.slice(0);
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            pair = _ref[_i];
+            x = Math.round(pair[0] * 30 + 5);
+            y = Math.round(pair[1] * 30 + 5);
+            _this.context.lineTo(x, y);
+          }
+          _this.context.closePath();
+          _this.context.stroke();
+          return console.log(event.data);
+        }
       };
       return this.worker.postMessage();
     };
@@ -1119,7 +1133,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<ul id=\"results\">\r\n\r\n</ul>\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n";});
+    return "\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n<ul id=\"results\">\r\n\r\n</ul>";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

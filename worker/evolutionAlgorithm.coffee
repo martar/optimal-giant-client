@@ -138,13 +138,16 @@ class Optimization
 			
 			# mutate initial population
 			mutatedInd = @mutatePop()
-			
+
 			# add crossed and mutated inds to population
 			for ind in crossedInd
-				@popul.idvs.push(ind)
+				@popul.idvs.push(ind)	
+				postMessage {type: 'intermediate', best:ind.skier.positions}
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
+				postMessage {type: 'intermediate', best:ind.skier.positions}
 				
+
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
 			
@@ -155,6 +158,8 @@ class Optimization
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
+			trol = 
+			postMessage {type: 'intermediate', best:@popul.idvs[0].skier.positions}
 			[theBest,theWorst]
 		return bestResults
 	

@@ -6,9 +6,9 @@ vectorDistance = (vector) ->
 self.onmessage = (ev) ->
 	vstart = [0,0.001]
 	startPoint = [0,0]
-	steep = 0.001
+	steep = 0.1
 	endPoint = [10,10]
-	accuracy = 0.001
+	accuracy = 0.1
 	
 	skier = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
 	skier.color = "red"

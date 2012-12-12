@@ -6,38 +6,69 @@
   importScripts('solver.js');
 
   self.onmessage = function(ev) {
-    var bests, crossNr, duration, endPoint, first, mutateProb, pop, populationCount, second, skier1, skier2, start, vLen;
+    var a, best, bestsAndWorstInIterations, brachSkier, crossNr, duration, endPoint, i, i_max, mutateProb, pop, populationCount, r, skier, skiers, start, t, t_max, v0, vLen, x, x0, y, _i;
     start = Date.now();
     populationCount = 10;
-    vLen = 0.1;
+    vLen = 0.000001;
     endPoint = [10, 10];
-    pop = new PointTurns(2, populationCount, vLen, endPoint);
-    crossNr = 5;
-    mutateProb = 5;
-    bests = new Optimization(pop, crossNr, mutateProb).compute();
-    'skier3 = new Skier(@mi=0, @m=60, @C=0, @A=0, @solver=new OptimalGiant.Solver, @x0=[0,0], @v0=[0,1])\nn = 0\nsteep = 0.01\nt0 = 0\nkappa = skier2.computeKappa(endPoint)\nwhile !skier2.isNear(endPoint)\n	t1 = t0+steep\n	skier2.move(t0, t1, kappa, 1)\n	t0 = t1\nt0 = t1-steep\nskier2.getPositions().pop()';
-
-    first = pop.idvs[0];
-    skier1 = first.skier;
-    second = pop.idvs[1];
-    skier2 = second.skier;
+    pop = new PointTurns(0.01, populationCount, vLen, endPoint);
+    crossNr = 10;
+    mutateProb = 1;
+    bestsAndWorstInIterations = new Optimization(pop, crossNr, mutateProb).compute();
+    brachSkier = new Skier(0, null, 0, 0, null, x0 = [0, 0], v0 = [vLen, 0]);
+    brachSkier.positions = [[0, 0]];
+    r = 5.74071;
+    t_max = 2.41;
+    i_max = 1000;
+    for (i = _i = 1; 1 <= i_max ? _i <= i_max : _i >= i_max; i = 1 <= i_max ? ++_i : --_i) {
+      t = i / i_max * t_max;
+      x = r * (t - Math.sin(t));
+      y = r * (1 - Math.cos(t));
+      brachSkier.moveStraightToPoint(0.001, [x, y], 0.001);
+    }
+    brachSkier.color = "red";
+    skiers = (function() {
+      var _j, _len, _ref, _results;
+      _ref = pop.idvs;
+      _results = [];
+      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+        best = _ref[_j];
+        _results.push(best.skier);
+      }
+      return _results;
+    })();
+    skiers.push(brachSkier);
     duration = Date.now() - start;
     return postMessage({
-      v_alpha: first.value,
-      time: first.fitness,
-      skiers: [
-        {
-          positions: skier1.getPositions(),
-          color: "red",
-          velocities: skier1.getVelocities(),
-          time: first.fitness
-        }, {
-          positions: skier2.getPositions(),
-          color: "blue",
-          velocities: skier2.getVelocities(),
-          time: second.fitness
+      type: 'final',
+      iterations: bestsAndWorstInIterations,
+      bestTime: pop.idvs[0].fitness,
+      duration: duration,
+      skiers: (function() {
+        var _j, _len, _results;
+        _results = [];
+        for (_j = 0, _len = skiers.length; _j < _len; _j++) {
+          skier = skiers[_j];
+          _results.push({
+            time: skier.result,
+            positions: skier.getPositions(),
+            color: skier.color
+          });
         }
-      ]
+        return _results;
+      })(),
+      points: (function() {
+        var _j, _len, _ref, _results;
+        _ref = pop.idvs;
+        _results = [];
+        for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+          a = _ref[_j];
+          _results.push({
+            val: a.value
+          });
+        }
+        return _results;
+      })()
     });
   };
 

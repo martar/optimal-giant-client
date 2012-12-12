@@ -12,9 +12,9 @@
     var accuracy, endPoint, kappa, lol, pos, skier, skier2, skier3, skiers, startPoint, steep, steepPositions, vcoord, vstart, x, _i, _len;
     vstart = [0, 0.001];
     startPoint = [0, 0];
-    steep = 0.001;
+    steep = 0.1;
     endPoint = [10, 10];
-    accuracy = 0.001;
+    accuracy = 0.1;
     skier = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = startPoint, this.v0 = vstart);
     skier.color = "red";
     kappa = skier.computeKappa(endPoint);

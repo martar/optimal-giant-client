@@ -24,7 +24,7 @@
   findCoords = function(value, length) {
     var coor, vProp;
     coor = [];
-    vProp = value;
+    vProp = Math.tan(value);
     coor.push(length / (Math.sqrt(1 + vProp * vProp)));
     coor.push(vProp * length / (Math.sqrt(1 + vProp * vProp)));
     return coor;
@@ -33,7 +33,7 @@
   PointTurns = (function() {
 
     function PointTurns(del_x, count, val, endPoint, startPoint) {
-      var angle, i, points, propEnd, randomAngles, skier, v0, x, x0, _i, _len;
+      var angle, center, i, kappa, points, propEnd, randomAngles, skier, v0, x, x0, _i, _len;
       this.del_x = del_x;
       this.endPoint = endPoint;
       this.startPoint = startPoint != null ? startPoint : [0, 0];
@@ -51,7 +51,9 @@
       for (_i = 0, _len = randomAngles.length; _i < _len; _i++) {
         angle = randomAngles[_i];
         skier = new solver.Skier(0, null, 0, 0, null, x0 = this.startPoint, v0 = findCoords(angle, val));
-        points = this.getPoints(1 / (skier.computeKappa(this.endPoint)), skier.getCircleCenter(this.endPoint));
+        kappa = skier.computeKappa(this.endPoint);
+        center = skier.getCircleCenter(this.endPoint);
+        points = this.getPoints(1 / kappa, center);
         this.idvs.push(new PointsSet(points, skier));
       }
     }
@@ -102,13 +104,13 @@
       if (this.fitness) {
         return this.fitness;
       }
-      interval = 0.001;
+      interval = 0.1;
       t = 0;
       this.min = 100000;
       _ref = this.value;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         nextPos = _ref[_i];
-        this.skier.moveStraightToPoint(interval, nextPos);
+        this.skier.moveStraightToPoint(interval, nextPos, 0.001);
       }
       return this.fitness = this.skier.result;
     };
@@ -123,7 +125,7 @@
     };
 
     PointsSet.prototype.mutate = function(percentValue) {
-      var i, ind, indCount, newValue, _i;
+      var diff, i, ind, indCount, newValue, _i;
       indCount = Math.floor(Math.random() * (this.value.length - 1));
       newValue = (function() {
         var _i, _len, _ref, _results;
@@ -136,8 +138,14 @@
         return _results;
       }).call(this);
       for (i = _i = 1; 1 <= indCount ? _i <= indCount : _i >= indCount; i = 1 <= indCount ? ++_i : --_i) {
-        ind = Math.floor(Math.random() * (this.value.length - 1));
+        ind = Math.floor(Math.random() * (this.value.length - 2));
         newValue[ind][1] = newValue[ind][1] + (Math.random() * percentValue * 2 - percentValue) * newValue[ind][1] / 100;
+        'while ( (ind>0 && newValue[ind][1] < newValue[ind-1][1]) || newValue[ind][1] > newValue[ind+1][1] || (ind==0 && newValue[ind][1]<@skier.positions[0][1]))\nnewValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100';
+
+        if (ind > 0 && (newValue[ind][1] > newValue[ind + 1][1] || newValue[ind][1] < newValue[ind - 1][1])) {
+          diff = Math.random() * (newValue[ind + 1][1] - newValue[ind - 1][1]) - (newValue[ind][1] - newValue[ind - 1][1]);
+          newValue[ind][1] = newValue[ind][1] + diff;
+        }
       }
       return this.createCopy(newValue);
     };
@@ -160,7 +168,7 @@
 
   this.PointTurns = PointTurns;
 
-  'pop = new PointTurns(1,20,1,[10,10])\n#console.log "nowa populacja:"\nfor i in pop.idvs.reverse()\n	console.log i.fitness\n	#for a in i.value\n	#console.log a\n\n#console.log ({fitness: i.fitness,points: ([a[0],a[1]] for a in i.value)} for i in pop.idvs.reverse())\n\n\nb = new evol.Optimization(pop,20,5).compute()\nconsole.log (i.fitness for i in pop.idvs.reverse())\nconsole.log b';
+  "pop = new PointTurns(1,20,1,[10,10])\n#console.log \"nowa populacja:\"\nfor i in pop.idvs.reverse()\n	console.log i.fitness\n	#for a in i.value\n	#console.log a\n\n#console.log ({fitness: i.fitness,points: ([a[0],a[1]] for a in i.value)} for i in pop.idvs.reverse())\n\n\nb = new evol.Optimization(pop,20,5).compute()\nconsole.log (i.fitness for i in pop.idvs.reverse())\nconsole.log b";
 
 
 }).call(this);

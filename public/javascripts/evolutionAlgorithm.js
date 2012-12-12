@@ -169,7 +169,7 @@
 
 
     Optimization.prototype.compute = function() {
-      var bestResults, crossedInd, i, ind, mutatedInd, theBest;
+      var bestResults, crossedInd, i, ind, mutatedInd, theBest, theWorst, trol;
       i = 0;
       this.popul.idvs = _.sortBy(this.popul.idvs, 'fitness');
       bestResults = (function() {
@@ -181,15 +181,29 @@
           for (_i = 0, _len = crossedInd.length; _i < _len; _i++) {
             ind = crossedInd[_i];
             this.popul.idvs.push(ind);
+            postMessage({
+              type: 'intermediate',
+              best: ind.skier.positions
+            });
           }
           for (_j = 0, _len1 = mutatedInd.length; _j < _len1; _j++) {
             ind = mutatedInd[_j];
             this.popul.idvs.push(ind);
+            postMessage({
+              type: 'intermediate',
+              best: ind.skier.positions
+            });
           }
           this.popul.idvs = _.sortBy(this.popul.idvs, 'fitness');
           this.popul.idvs = this.popul.idvs.slice(0, (this.size - 1) + 1 || 9e9);
           i += 1;
-          _results.push(theBest = this.popul.idvs[0]);
+          theBest = this.popul.idvs[0].fitness;
+          theWorst = this.popul.idvs[this.size - 1].fitness;
+          trol = postMessage({
+            type: 'intermediate',
+            best: this.popul.idvs[0].skier.positions
+          });
+          _results.push([theBest, theWorst]);
         }
         return _results;
       }).call(this);
@@ -202,7 +216,10 @@
     Optimization.prototype.crossPop = function() {
       var a, i, it, j, newInd, _i, _ref;
       newInd = [];
-      for (it = _i = 0, _ref = this.nrOfCrossed; 0 <= _ref ? _i <= _ref : _i >= _ref; it = 0 <= _ref ? ++_i : --_i) {
+      if (this.nrOfCrossed < 1) {
+        return newInd;
+      }
+      for (it = _i = 1, _ref = this.nrOfCrossed; 1 <= _ref ? _i <= _ref : _i >= _ref; it = 1 <= _ref ? ++_i : --_i) {
         i = Math.floor(Math.random() * this.size);
         j = Math.floor(Math.random() * this.size);
         a = this.popul.idvs[i].cross(this.popul.idvs[j]);
@@ -232,7 +249,7 @@
       var theBest, theWorst;
       theWorst = this.popul.idvs[this.size - 1];
       theBest = this.popul.idvs[0];
-      return Math.abs(theBest.fitness - theWorst.fitness) / theBest.fitness < 0.001;
+      return (Math.abs(theBest.fitness - theWorst.fitness) / theBest.fitness) < 0.0001;
     };
 
     return Optimization;
