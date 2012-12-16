@@ -36,7 +36,7 @@ module.exports = class HomePageView extends PageView
 				@draw event.data
 				console.log event.data
 				@renderResults event.data
-			else
+			else if(event.data.type == 'intermediate')
 				# clear the canvas
 				@context.clearRect(0, 0, @canvas.width, @canvas.height)
 				@context.beginPath()
@@ -48,6 +48,8 @@ module.exports = class HomePageView extends PageView
 					
 				@context.closePath()
 				@context.stroke()
+				console.log event.data
+			else
 				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage()
