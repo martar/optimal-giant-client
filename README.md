@@ -1,6 +1,8 @@
 # OptimalGiant client
 
-Client side code for in browser computations and visualization
+Client side code for in browser computations and visualization.
+
+Detail description of the problem and of the phicical model can be found in our another repo: https://github.com/martar/optimal-gigant/wiki
 
 ## Dependency
 
