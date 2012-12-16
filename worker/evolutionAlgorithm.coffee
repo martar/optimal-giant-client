@@ -1,12 +1,17 @@
 
 importScripts './underscore.js'
 importScripts './solver.js'	
-
+importScripts './gauss.js'
 """
 _ = require('./underscore.js')
 require('./solver.js')
 """
-	
+
+K = 1
+tau = (n) -> K/(Math.sqrt(2*n))
+tau_prim = (n) -> K/(Math.sqrt(2*Math.sqrt(n)))
+
+
 class Turns	
 	constructor: (count,val,endPoint) ->
 		propEnd = endPoint[1]/endPoint[0]
@@ -123,6 +128,8 @@ class Optimization
 	'''
 	constructor: (@popul,@nrOfCrossed,@mutationProb) ->
 		@size = @popul.idvs.length
+		@tau = tau(@size)
+		@tau_prim = tau_prim(@size)
 	'''
 	The core function which mainpulates the population to find the best individual
 	'''
@@ -145,7 +152,7 @@ class Optimization
 				postMessage {type: 'intermediate', best:ind.skier.positions}
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
-				postMessage {type: 'intermediate', best:ind.skier.positions}
+				postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
 				
 
 			# sort population
@@ -179,12 +186,13 @@ class Optimization
 	
 	mutatePop: () ->
 		mutIds = []
+		gaussAll = Math.nrand()
 		for ind in @popul.idvs
 			# 1/mutationProb chance for mutation
 			ifMut = Math.floor(Math.random()*@mutationProb)
 			if ifMut%@mutationProb==0
-				# +- 10% change
-				mutIds.push(ind.mutate(10))
+				# mutate ind
+				mutIds.push(ind.mutate(gaussAll, @tau, @tau_prim))
 		mutIds
 	
 	'''
@@ -193,7 +201,8 @@ class Optimization
 	stop: () ->
 		theWorst = @popul.idvs[@size-1]
 		theBest = @popul.idvs[0]
-		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.0001
+		postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
+		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.00001
 		
 @Turns = Turns
 @Optimization = Optimization

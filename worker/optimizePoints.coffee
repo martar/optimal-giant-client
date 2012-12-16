@@ -3,6 +3,7 @@
 importScripts './underscore.js'
 importScripts './solver.js'	
 importScripts './evolutionAlgorithm.js'
+importScripts './gauss.js'
 evol = {}
 evol.Individual = Individual
 solver = {}
@@ -11,8 +12,9 @@ solver.Skier = Skier
 _ = require('./underscore.js')
 solver = require('./solver.js')
 evol = require('./evolutionAlgorithm.js')
+gauss = require('./gauss.js')
 """
-	
+
 findCoords = (value,length) ->
 	coor = []
 	vProp = Math.tan(value)
@@ -27,7 +29,7 @@ class PointTurns
 		propEnd = (@endPoint[1]-@startPoint[1])/(@endPoint[0] - @startPoint[0])
 		x = Math.atan(propEnd)
 		
-		# znajdz punkty dla randomowych prêdkoœci i stwórz pierwsze obiekty populacji
+		# find points for random velocities and create initial population
 		randomAngles = (Math.random()* (Math.PI/2 - Math.abs(x)) + Math.abs(x) for i in [1..count])
 		
 		#randomAngles = [Math.PI/2, Math.PI/2 - 0.2, Math.PI/4 + 0.25, Math.PI/4 + 0.3, Math.PI/4 + 0.4]
@@ -38,6 +40,9 @@ class PointTurns
 			kappa = skier.computeKappa(@endPoint)
 			center = skier.getCircleCenter(@endPoint)
 			points = @getPoints(1/kappa,center)
+			# add initial deviation
+			for point in points
+				point.push 1
 			@idvs.push(new PointsSet(points,skier))
 		
 	getPoints: (R,center) ->
@@ -49,7 +54,7 @@ class PointTurns
 			y = Math.sqrt(Math.pow(R,2)-Math.pow((center[0]-cur_x),2)) + center[1]
 			points.push([cur_x,y])
 			cur_x += @del_x
-		points.push(@endPoint)
+		points.push(@endPoint[..])
 		#console.log "points:", points
 		points
 
@@ -67,7 +72,6 @@ class PointsSet extends evol.Individual
 			@skier.positions = [pos[0],pos[1]]
 			vel = @skier.getVelocities().reverse()[0]
 			@skier.velocities = [vel[0],vel[1]]
-		else @skier.velocities
 		@computeFitness()
 	
 	computeFitness: () ->
@@ -89,31 +93,43 @@ class PointsSet extends evol.Individual
 		firstVel = skierVel[skierVel.length-1]
 		
 		new PointsSet(changedPoints, new solver.Skier(0, null, 0, 0, null, x0=[firstPos[0], firstPos[1] ],v0=[firstVel[0],firstVel[1]]))
-		
-	mutate: (percentValue) ->
+	
+	'''
+	mutate individual
+	gaussAll - nrand value used for whole population in one iteration
+	tau, tau_prim - parameters of evolutionary algorithm
+	'''
+	mutate: (gaussAll, tau, tau_prim) ->
+	
 		indCount = Math.floor(Math.random()*(@value.length-1))
 
 		# deep copy
-		newValue = ([i[0],i[1]] for i in @value)
+		newValue = ([i[0],i[1],i[2]] for i in @value)
 		
 		for i in [1..indCount]
 			# do not change endPoint
 			ind = Math.floor(Math.random()*(@value.length-2))
 		
 			# change +- percentValue percent
-			newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
-			'''while ( (ind>0 && newValue[ind][1] < newValue[ind-1][1]) || newValue[ind][1] > newValue[ind+1][1] || (ind==0 && newValue[ind][1]<@skier.positions[0][1]))
-				newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
-			'''
-			# find new random if the skier must ride up the slope
-			if ind>0 and (newValue[ind][1]>newValue[ind+1][1] or newValue[ind][1]<newValue[ind-1][1])
-				diff = Math.random()*(newValue[ind+1][1] - newValue[ind-1][1]) - (newValue[ind][1] - newValue[ind-1][1])
-				newValue[ind][1] = newValue[ind][1] + diff
+			gauss = Math.nrand()
 			
+			# mutate sigma
+			newValue[ind][2] = newValue[ind][2] * Math.exp(tau_prim*gaussAll + tau*gauss)
+			
+			gauss = Math.nrand()			
+			diff = newValue[ind][2]*gauss
+			
+			# find new random if the skier must ride up the slope 
+			while (ind==0 and newValue[ind][1] + diff>newValue[ind+1][1]) or (ind>0 and (newValue[ind][1] + diff>newValue[ind+1][1] or newValue[ind][1] + diff < newValue[ind-1][1]))
+				gauss = Math.nrand()
+				diff = newValue[ind][2]*gauss
+			newValue[ind][1] += diff
+				
 		@createCopy(newValue)
 		
 	cross: (b) ->
-		@createCopy(([@value[i][0] ,(@value[i][1] + b.value[i][1])/2] for i in [0..@value.length-1]))
+		# TODO cross the sigma??
+		@createCopy(([@value[i][0] ,(@value[i][1] + b.value[i][1])/2, @value[i][2]] for i in [0..@value.length-1]))
 
 @PointTurns = PointTurns
 
