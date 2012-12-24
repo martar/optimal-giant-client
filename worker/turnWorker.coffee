@@ -23,7 +23,7 @@ self.onmessage = (ev) ->
 		x = r*(t - Math.sin(t))
 		y = r*(1 - Math.cos(t))
 		#brachSkier.positions.push([x,y])
-		brachSkier.moveStraightToPoint(0.001,[x,y],0.001)
+		brachSkier.moveStraightToPoint([x,y],0.001)
 	brachSkier.color = "red"
 
 	skiers = (best.skier for best in pop.idvs)

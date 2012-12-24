@@ -30,18 +30,38 @@ class Utils
 	finds the coordinates from the length of the vector and 
 	tan angle of inclination of the next velocity vector with the same length
 	###
-	this.findCoords = (vProp, length) -> 
-		coor = []
-		coor.push(length/(Math.sqrt(1+vProp*vProp)))
-		coor.push(vProp*length/(Math.sqrt(1+vProp*vProp)))
-		coor
-			
+	this.findCoords = (endPoint, position, length) -> 
+		vProp = (endPoint[1] - position[1])/(endPoint[0] - position[0])
+		factor = 1
+		if (endPoint[0] - position[0] < 0)
+			factor = -1
+		vx = factor * length/(Math.sqrt(1+vProp*vProp))
+		vy = factor * vProp*length/(Math.sqrt(1+vProp*vProp))
+		[vx, vy]
+	
 	###
 	computes length of the vector
 	###
 	this.vectorLength = (vector) ->
 		Math.sqrt( Math.pow(vector[0],2) + Math.pow(vector[1],2))
 	
+	# two dimensional vector distance in Kartezian metric
+	this.vectorDistance = (vector1, vector2) ->
+		[xEnd, yEnd] = vector1
+		[xx,xy] = vector2
+		Utils.vectorLength([ xEnd-xx, yEnd-xy])
+		
+	this.compute_sin_cos_beta = (v0) =>
+		v0_length = mag(v0)
+		eps = 0.00001
+		if v0_length<=eps
+			cos_beta=0.0
+			sin_beta=1.0
+		else
+			cos_beta =  v0[0]/v0_length
+			sin_beta = v0[1]/v0_length
+		[sin_beta, cos_beta]
+		
 class Skier
 	###
 	C - drag coefficient, typical values (0.4 - 1)
@@ -68,22 +88,21 @@ class Skier
 	Move the skier to the endPoint. It changes the skier inner state. It is not confirmed that the skier really 
 	managed to reach the proximity of that point
 	###
-	moveToPoint : (steep, kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
+	moveToPoint : (kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
 		while !reachedDestination
-			reachedDestination = @_move(steep, kappa, endPoint, accuracy, sign_omega)
+			reachedDestination = @_move(kappa, endPoint, accuracy, sign_omega)
 		
 	###
 	Move the skier to the endPoint going in the straight line (kappa ~ 0).  It changes the skier inner state. It is not confirmed that the skier really 
 	managed to reach the proximity of that point
 	###			
-	moveStraightToPoint : ( steep, endPoint, accuracy = 0.01, sign_omega = 1) ->
+	moveStraightToPoint : ( endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
 		kappa = 0.0001
 		while !reachedDestination
-			v =Utils.findCoords( (endPoint[1] - @positions[0][1])/(endPoint[0] - @positions[0][0]), Utils.vectorLength(@velocities[0]))
-			reachedDestination = @_moveWithArbitraryV(v, steep, kappa, endPoint, accuracy, sign_omega)
-	
+			v =Utils.findCoords( endPoint, @positions[0], Utils.vectorLength(@velocities[0]))
+			reachedDestination = @_moveWithArbitraryV(v, kappa, endPoint, accuracy, sign_omega)
 	###
 	Compute new kappa that is required so that the skier read the endPoint taking current velocity vector into account. It is not guaranted that the skier really 
 	managed to reach the proximity of that point using computed kappa
@@ -111,87 +130,100 @@ class Skier
 	
 	getVelocities: () ->
 		@velocities
-	
-	_betterTime : (notYetTime, overTime, endPoint, result) ->
-		[xEnd, yEnd] = endPoint
-		middleTime = (notYetTime + overTime)/2
-		midResult = result.at([middleTime])[0]
-		[xxMid, xyMid, _, _] = midResult
-		if (xxMid < xEnd and xyMid < yEnd)
-			notYetTime = middleTime
-		else
-			overTime = middleTime
-		[midResult, middleTime, notYetTime, overTime]
-			
+		
 	_isNotCloseEnought : (currPoint, endPoint, accuracy = 0.01) ->
 		[xEnd, yEnd] = endPoint
-		[xx,xy] = currPoint
-		Utils.vectorLength([ xEnd-xx, yEnd-xy]) > accuracy
-			
+		[xx,xy, _, _] = currPoint
+		Utils.vectorDistance(currPoint, endPoint) > accuracy
+		
+	_doesHeReach :(start, actualEndPoint, wannaBeEndPoint) ->
+		Utils.vectorDistance(start, actualEndPoint) > Utils.vectorDistance(start, wannaBeEndPoint)
 	###
-	Important method. It applies state change of the skier based on the computed result of one single step of the computation. It
-	also decide when the skier reached the endPoint!
+	Important method. It applies state change of the skier based on the computed result of one single step of the computation. It also decide when the skier reached the endPoint
 	###
 	_whatIsMyResult : (endPoint, result, accuracy) ->
+		reachedDestination = true
 		[xEnd, yEnd] = endPoint
 		lastIndex = result.y.length-1
-		reachedDestination = false
-		finalResult = result.y[lastIndex]
-		finalTime = result.x[lastIndex]
-		# TODO can do binary search
-		for resultYSteep, index in result.y
-			if index == 0
-				continue
-			[xx, xy, vx, vy] =resultYSteep
-			if (xx > xEnd or xy > yEnd)
-				notYetTime = result.x[index-1]
-				overTime = result.x[index]
-				
-				finalResult = resultYSteep
-				finalTime = overTime
+		lastRow = result.y[lastIndex]
+		finalResult = lastRow
+		startPosition = result.y[0]
+		startTime = result.x[0]
+		overTime = result.x[lastIndex]
+		finalTime = overTime
+		# check if the skeir can reach the endPoint in the computed step. If not, just move the skier to the most futher point
+		if !(@_doesHeReach(startPosition, lastRow, endPoint))
+			reachedDestination = false
+		else
+			# if he - out of the box is close enought based on the required accuracy,
+			# we don't need to enter the loop to make find the closer positions
 
-				while @_isNotCloseEnought(finalResult, [xEnd, yEnd], accuracy)
-					previousNewTime = newTime
-					[newPoint, newTime, notYetTime, overTime] = @_betterTime(notYetTime, overTime, endPoint, result)
-					# if the time dousn't change
-					if previousNewTime == newTime
-						break
-					finalResult = newPoint
-					finalTime = newTime
-				reachedDestination = true
-				break
+			# but if he if to far from the required EndPoint
+			while @_isNotCloseEnought(finalResult, [xEnd, yEnd], accuracy)
+				previousNewTime = middleTime
+				middleTime = (startTime + overTime)/2
+				if previousNewTime == middleTime
+					# can't do it, something went wrong - our phisic model can't handle this
+					throw "I cannot go there with required accuracy!"
+				midResult = result.at([middleTime])[0]
+			
+				# is the intermediate result in the first half of the interval
+				if @_doesHeReach(startPosition, midResult, endPoint)
+					overTime = middleTime
+				else
+					startTime  = middleTime
+				
+				finalResult = midResult
+				finalTime = middleTime
+			
 		[xx, xy, vx, vy] = finalResult
 		@positions.unshift [xx, xy]
 		@velocities.unshift [vx, vy]
-		# update the result in a skier - how much time the movement took
+		# update the result in a skier - how much time the movement really took
 		@result = finalTime
 		reachedDestination
-	
 	###
 	just show the result, without any sideeffect and changing state of the skier
 	###
-	moveDebug: (steep, kappa, endPoint, sign_omega = 1) ->
+	
+	###
+	Try to compute the appriopriate time steep for the move based on the velocity vector and endPoint. The idea is to make 
+	a prediction of the time steep in which the skier would really manage to go
+	from the current point to the endPoint.
+	now, the reference is made based on the time requires to 
+	go from currrent position  to endPosition with constant acceletarion multipied with
+	our home made constant. Multiplication is needed, because there are additional friction and air resistant forces.
+	Additional fallback is added, so that the interval is never less than a given threshold
+	###
+	_adaptSteep : (endPoint) ->
+		vLen = Utils.vectorLength(@velocities[0])
+		s = Utils.vectorDistance(@positions[0], endPoint)
+		[_, cos_beta] = Utils.compute_sin_cos_beta(@velocities[0])
+		a = g * Math.sin(alfa) * cos_beta
+		optimalGiantConstant = 5
+		result = optimalGiantConstant*(Math.sqrt(vLen*vLen+2*a*s) - vLen)/a
+		threshold = 0.001
+		# result can be NaN (division by zero)
+		if not result or result < threshold
+			result = threshold
+		result
+		
+	moveDebug: (kappa, endPoint, sign_omega = 1) ->
+		steep = @_adaptSteep(@velocities[0], endPoint)
 		@solver.solve(@result,@result+steep,@positions[0], @velocities[0], kappa, sign_omega, this)
 		
-	_move: (steep, kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
+	_move: (kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
+		steep = @_adaptSteep(endPoint)
 		result = @solver.solve(@result,@result+steep,@positions[0], @velocities[0], kappa, sign_omega, this)
 		@_whatIsMyResult(endPoint, result, accuracy)
 		
-	_moveWithArbitraryV: (v, steep, kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
+	_moveWithArbitraryV: (v, kappa, endPoint, accuracy = 0.01, sign_omega = 1) ->
+		steep = @_adaptSteep(endPoint)
 		result = @solver.solve(@result,@result+steep,@positions[0], v, kappa, sign_omega, this)
 		@_whatIsMyResult(endPoint, result, accuracy)
 	
 class Solver
-	compute_sin_cos_beta = (v0) =>
-		v0_length = mag(v0)
-		eps = 0.00001
-		if v0_length<=eps
-			cos_beta=0.0
-			sin_beta=1.0
-		else
-			cos_beta =  v0[0]/v0_length
-			sin_beta = v0[1]/v0_length
-		[sin_beta, cos_beta]
+
     
 	movementEquasion = (t,v, params) =>
 		[_, _, vx, vy] = v
@@ -216,7 +248,7 @@ class Solver
 			skier.k2 = 0
 		else
 			k1 = 0
-		[sinus, cosinus] = compute_sin_cos_beta(v0)
+		[sinus, cosinus] = Utils.compute_sin_cos_beta(v0)
 		params = {kappa: kappa, skier: skier, sinus: sinus, cosinus: cosinus, sign_omega:sign_omega}
 		lib.numeric.dopri(start,end,[x0[0], x0[1], v0[0], v0[1]], (t,v) -> movementEquasion(t,v,params))  
 
@@ -239,4 +271,3 @@ kappa = skier.computeKappa(endPoint)
 skier.moveToPoint(steep, kappa, endPoint, accuracy)
 steepPositions = (x for x in skier.getPositions() by 1000).reverse()
 ###
-

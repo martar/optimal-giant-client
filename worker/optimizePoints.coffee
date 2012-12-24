@@ -7,11 +7,11 @@ evol = {}
 evol.Individual = Individual
 solver = {}
 solver.Skier = Skier
-"""
+###
 _ = require('./underscore.js')
 solver = require('./solver.js')
 evol = require('./evolutionAlgorithm.js')
-"""
+###
 	
 findCoords = (value,length) ->
 	coor = []
@@ -78,7 +78,7 @@ class PointsSet extends evol.Individual
 		@min = 100000
 
 		for nextPos in @value
-			@skier.moveStraightToPoint(interval, nextPos, 0.001)
+			@skier.moveStraightToPoint(nextPos, 0.001)
 		#console.log "czas: ", t
 		@fitness = @skier.result
 		

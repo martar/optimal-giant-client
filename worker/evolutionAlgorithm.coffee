@@ -1,11 +1,11 @@
 
 importScripts './underscore.js'
 importScripts './solver.js'	
+###
 
-"""
 _ = require('./underscore.js')
 require('./solver.js')
-"""
+###
 	
 class Turns	
 	constructor: (count,val,endPoint) ->
@@ -55,6 +55,7 @@ class Turn extends Individual
 		@computeFitness()
 	
 	computeFitness: () ->
+		throw "THIS CODE SHOULD NOT BE USED"
 		if @fitness
 			return @fitness
 		interval = 0.0001
