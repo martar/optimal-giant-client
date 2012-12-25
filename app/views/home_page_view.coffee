@@ -29,14 +29,36 @@ module.exports = class HomePageView extends PageView
 			@context.closePath()
 			@context.stroke()
   
+	drawIntermediate: (data) ->
+		@context.clearRect(0, 0, @canvas.width, @canvas.height)
+		@context.beginPath()
+		@context.moveTo data.best[0][0],data.best[0][1]
+		for pair in data.best[0..]
+			x = Math.round (pair[0]*30 + 5)
+			y = Math.round (pair[1]*30 + 5)
+			@context.lineTo x, y
+			
+		@context.closePath()
+		@context.stroke()
+		
 	renderResults: (data) -> 
 		for skier in data.skiers
 			skier.color ?= "black"
 			@$('#results').append($("<li></li>").html(skier.color + ' ' + skier.time))
 	
+	processStatistics: (data) =>
+		if (data.plugin == "AverageFitness")
+			@avgFitness.push( [@avgFitness.length, data.value])
+		else if (data.plugin == "BestFitness")
+			@bestFitness.push( [@bestFitness.length, data.value])
+		else if (data.plugin == "WorstFitness")
+			@worstFitness.push( [@worstFitness.length, data.value])
+		plot1 = $.jqplot('stats_plots',  [@avgFitness, @bestFitness, @worstFitness], {
+			title:"Live alg stats: best, avg and worst fitness in population"
+		})
+		plot1.redraw()
 	
 	work: () =>
-		
 		@worker.onmessage = (event) =>
 			if (event.data.type == 'final')
 				@draw event.data
@@ -44,28 +66,10 @@ module.exports = class HomePageView extends PageView
 				@renderResults event.data
 			else if (event.data.type == 'intermediate')
 				# clear the canvas
-				@context.clearRect(0, 0, @canvas.width, @canvas.height)
-				@context.beginPath()
-				@context.moveTo event.data.best[0][0],event.data.best[0][1]
-				for pair in event.data.best[0..]
-					x = Math.round (pair[0]*30 + 5)
-					y = Math.round (pair[1]*30 + 5)
-					@context.lineTo x, y
-					
-				@context.closePath()
-				@context.stroke()
+				@drawIntermediate event.data
 				console.log event.data
 			else if (event.data.type == "stats")
-				if (event.data.plugin == "AverageFitness")
-					@avgFitness.push( [@avgFitness.length, event.data.value])
-				else if (event.data.plugin == "BestFitness")
-					@bestFitness.push( [@bestFitness.length, event.data.value])
-				else if (event.data.plugin == "WorstFitness")
-					@worstFitness.push( [@worstFitness.length, event.data.value])
-				plot1 = $.jqplot('trol',  [@avgFitness, @bestFitness, @worstFitness], {
-					title:"Live alg stats: best, avg and worst fitness in population"
-				})
-				plot1.redraw()
+				@processStatistics event.data
 			else
 				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
