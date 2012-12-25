@@ -9,7 +9,11 @@ module.exports = class HomePageView extends PageView
 		@canvas = @$('#slope').get(0)
 		@context = @canvas.getContext('2d')
 		@worker = new Worker 'javascripts/turnWorker.js'
+		@avgFitness = [[]]
+		@bestFitness = [[]]
+		@worstFitness = [[]]
 		@work()
+
 
 	draw: (data) ->
 		for skier in data.skiers
@@ -29,14 +33,16 @@ module.exports = class HomePageView extends PageView
 		for skier in data.skiers
 			skier.color ?= "black"
 			@$('#results').append($("<li></li>").html(skier.color + ' ' + skier.time))
-		
+	
+	
 	work: () =>
+		
 		@worker.onmessage = (event) =>
 			if (event.data.type == 'final')
 				@draw event.data
 				console.log event.data
 				@renderResults event.data
-			else
+			else if (event.data.type == 'intermediate')
 				# clear the canvas
 				@context.clearRect(0, 0, @canvas.width, @canvas.height)
 				@context.beginPath()
@@ -49,5 +55,19 @@ module.exports = class HomePageView extends PageView
 				@context.closePath()
 				@context.stroke()
 				console.log event.data
+			else if (event.data.type == "stats")
+				if (event.data.plugin == "AverageFitness")
+					@avgFitness.push( [@avgFitness.length, event.data.value])
+				else if (event.data.plugin == "BestFitness")
+					@bestFitness.push( [@bestFitness.length, event.data.value])
+				else if (event.data.plugin == "WorstFitness")
+					@worstFitness.push( [@worstFitness.length, event.data.value])
+				plot1 = $.jqplot('trol',  [@avgFitness, @bestFitness, @worstFitness], {
+					title:"Live alg stats: best, avg and worst fitness in population"
+				})
+				plot1.redraw()
+			else
+				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
-		@worker.postMessage()
+		@worker.postMessage({})
+		

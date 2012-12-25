@@ -1,10 +1,9 @@
 #importScripts 'evolutionAlgorithm.js'
 importScripts 'optimizePoints.js'
 importScripts 'solver.js'
-
+		
 self.onmessage = (ev) ->
 	start = Date.now()
-	
 	populationCount = 10
 	vLen = 0.000001
 	endPoint = [10,10]

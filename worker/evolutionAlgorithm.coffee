@@ -1,6 +1,8 @@
 
 importScripts './underscore.js'
-importScripts './solver.js'	
+importScripts './solver.js'
+
+importScripts './statistics.js'
 ###
 
 _ = require('./underscore.js')
@@ -124,6 +126,7 @@ class Optimization
 	'''
 	constructor: (@popul,@nrOfCrossed,@mutationProb) ->
 		@size = @popul.idvs.length
+		@stats = new Stats()
 	'''
 	The core function which mainpulates the population to find the best individual
 	'''
@@ -148,7 +151,7 @@ class Optimization
 				@popul.idvs.push(ind)
 				postMessage {type: 'intermediate', best:ind.skier.positions}
 				
-
+			@stats.feed(@popul.idvs)
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
 			

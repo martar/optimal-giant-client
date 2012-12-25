@@ -3,6 +3,8 @@
 importScripts './underscore.js'
 importScripts './solver.js'	
 importScripts './evolutionAlgorithm.js'
+
+
 evol = {}
 evol.Individual = Individual
 solver = {}
