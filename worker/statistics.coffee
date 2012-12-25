@@ -41,13 +41,6 @@ class Stats
 	###
 	constructor: () ->
 		@plugins = [new BestFitnessInPopulationPlugin(), new AverageFitnessPlugin(), new WorstFitnessInPopulationPlugin()]
-		return
-	
-	###
-	Resets the module
-	###
-	reset: () ->
-		return
 		
 	###
 	Callback to called every time the new data arrives
