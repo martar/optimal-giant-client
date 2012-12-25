@@ -1,37 +1,28 @@
 importScripts 'solver.js'   
 
-vectorDistance = (vector) ->
-	Math.sqrt( Math.pow(vector[0],2) + Math.pow(vector[1],2))
-
 self.onmessage = (ev) ->
-	vstart = [0,0.001]
-	startPoint = [0,0]
-	steep = 0.1
-	endPoint = [10,10]
-	accuracy = 0.1
-	
-	skier = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
-	skier.color = "red"
-	kappa = skier.computeKappa(endPoint)
-	skier.moveToPoint(steep, kappa, endPoint, accuracy)
-	steepPositions = (x for x in skier.getPositions() by 100).reverse()
-	
-
-	skier2 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
-	for pos in steepPositions
-		skier2.moveStraightToPoint(steep, pos, accuracy)
-	
-	# straight line, so the start vector must have same both coordinates
-	vcoord = vectorDistance(vstart)/1.42
-	skier3 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=[vcoord,vcoord])
-	kappa = 0.000001
-	skier3.moveToPoint(steep, kappa, endPoint, accuracy)
-	skier3.color = "blue"
-	
+	accuracy = 0.01
+	skier = new Skier(null, null, null, null, null, x0=[0,0], v0=[0.001,0])
+	points = [[1, 2], [4, 5], [8, 6], [11,8], [10,11], [8, 13], [6, 14], [4,15], [2,16], [1,17], [2, 18], [4, 19], [6,20], [8,21], [10, 23] ]
+	for point in points
+		skier.moveStraightToPoint(point, accuracy)
+		
+	positions = skier.positions.reverse()
+	i = 0
+	diffs = []
+	len = skier.positions.length
+	while (i <= len-2)
+		[x2,y2] = positions[i+1]
+		[x1,y1] = positions[i]
+		diffs.push (y2-y1)/(x2-x1)
+		i+=1
+	values = []
+	len = diffs.length
+	i=0
+	while (i <= len-2)
+		values.push Math.abs(diffs[i+1] - diffs[i]).toFixed(5)
+		i+=1
 	skiers = []
 	skiers.push skier
-	skiers.push skier2
-	skiers.push skier3
-	
 	lol = ({time: skier.result, positions: skier.getPositions(), color: skier.color, diff: skier.positions[0]} for skier in skiers)
-	postMessage {skiers: lol}
+	postMessage {type: 'final', skiers: lol, trol: values}

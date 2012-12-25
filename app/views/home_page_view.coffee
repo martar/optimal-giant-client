@@ -8,7 +8,7 @@ module.exports = class HomePageView extends PageView
 		super
 		@canvas = @$('#slope').get(0)
 		@context = @canvas.getContext('2d')
-		@worker = new Worker 'javascripts/turnWorker.js'
+		@worker = new Worker 'javascripts/worker.js'
 		@avgFitness = [[]]
 		@bestFitness = [[]]
 		@worstFitness = [[]]
