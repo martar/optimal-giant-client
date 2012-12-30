@@ -25,7 +25,7 @@ findCoords = (value,length) ->
 
 
 class PointTurns	
-	constructor: (@del_x,count,val,@endPoint,@startPoint=[0,0]) ->
+	constructor: (@del_y,count,val,@endPoint,@startPoint=[0,0]) ->
 		propEnd = (@endPoint[1]-@startPoint[1])/(@endPoint[0] - @startPoint[0])
 		x = Math.atan(propEnd)
 		
@@ -47,17 +47,15 @@ class PointTurns
 		
 	getPoints: (R,center) ->
 		#console.log "ko³o:", R,center
-		cur_x = @startPoint[0] + @del_x
-		# points = [@startPoint]
+		cur_y = @startPoint[1] + @del_y
 		points = []
-		while cur_x < @endPoint[0]
-			y = Math.sqrt(Math.pow(R,2)-Math.pow((center[0]-cur_x),2)) + center[1]
-			points.push([cur_x,y])
-			cur_x += @del_x
+		while cur_y < @endPoint[1]
+			#TODO problem with +-!! 
+			x = -Math.sqrt(Math.pow(R,2)-Math.pow((center[1]-cur_y),2)) + center[0]
+			points.push([x,cur_y])
+			cur_y += @del_y
 		points.push(@endPoint[..])
-		#console.log "points:", points
 		points
-
 		
 class PointsSet extends evol.Individual
 	constructor: (points,@skier) ->
@@ -106,10 +104,12 @@ class PointsSet extends evol.Individual
 		# deep copy
 		newValue = ([i[0],i[1],i[2]] for i in @value)
 		
+		inds = []
+		
 		for i in [1..indCount]
 			# do not change endPoint
 			ind = Math.floor(Math.random()*(@value.length-2))
-		
+			inds.push(ind)
 			# change +- percentValue percent
 			gauss = Math.nrand()
 			
@@ -119,17 +119,13 @@ class PointsSet extends evol.Individual
 			gauss = Math.nrand()			
 			diff = newValue[ind][2]*gauss
 			
-			# find new random if the skier must ride up the slope 
-			while (ind==0 and newValue[ind][1] + diff>newValue[ind+1][1]) or (ind>0 and (newValue[ind][1] + diff>newValue[ind+1][1] or newValue[ind][1] + diff < newValue[ind-1][1]))
-				gauss = Math.nrand()
-				diff = newValue[ind][2]*gauss
-			newValue[ind][1] += diff
-				
+			newValue[ind][0] += diff
+		#postMessage({inds:inds})
 		@createCopy(newValue)
 		
 	cross: (b) ->
 		# TODO cross the sigma??
-		@createCopy(([@value[i][0] ,(@value[i][1] + b.value[i][1])/2, @value[i][2]] for i in [0..@value.length-1]))
+		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1], @value[i][2]] for i in [0..@value.length-1]))
 
 @PointTurns = PointTurns
 
