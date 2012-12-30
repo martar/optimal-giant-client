@@ -51,7 +51,7 @@ class PointTurns
 			x = -Math.sqrt(Math.pow(R,2)-Math.pow((center[1]-cur_y),2)) + center[0]
 			points.push([x,cur_y])
 			cur_y += @del_y
-		points.push(@endPoint)
+		points.push(@endPoint[..])
 		#console.log "points:", points
 		points
 
