@@ -151,7 +151,6 @@ class Optimization
 				@popul.idvs.push(ind)
 				postMessage {type: 'intermediate', best:ind.skier.positions}
 				
-			@stats.feed(@popul.idvs)
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
 			
@@ -159,6 +158,7 @@ class Optimization
 			@popul.idvs = @popul.idvs[0..(@size-1)]
 			
 			i+=1
+			@stats.feed(@popul.idvs)
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
