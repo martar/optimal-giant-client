@@ -25,7 +25,7 @@ findCoords = (value,length) ->
 
 
 class PointTurns	
-	constructor: (@del_x,count,val,@endPoint,@startPoint=[0,0]) ->
+	constructor: (@del_y,count,val,@endPoint,@startPoint=[0,0]) ->
 		propEnd = (@endPoint[1]-@startPoint[1])/(@endPoint[0] - @startPoint[0])
 		x = Math.atan(propEnd)
 		
@@ -44,13 +44,13 @@ class PointTurns
 		
 	getPoints: (R,center) ->
 		#console.log "ko³o:", R,center
-		cur_x = @startPoint[0] + @del_x
+		cur_y = @startPoint[1] + @del_y
 		# points = [@startPoint]
 		points = []
-		while cur_x < @endPoint[0]
-			y = Math.sqrt(Math.pow(R,2)-Math.pow((center[0]-cur_x),2)) + center[1]
-			points.push([cur_x,y])
-			cur_x += @del_x
+		while cur_y < @endPoint[1]
+			x = -Math.sqrt(Math.pow(R,2)-Math.pow((center[1]-cur_y),2)) + center[0]
+			points.push([x,cur_y])
+			cur_y += @del_y
 		points.push(@endPoint)
 		#console.log "points:", points
 		points
@@ -103,19 +103,12 @@ class PointsSet extends evol.Individual
 			ind = Math.floor(Math.random()*(@value.length-2))
 		
 			# change +- percentValue percent
-			newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
-			'''while ( (ind>0 && newValue[ind][1] < newValue[ind-1][1]) || newValue[ind][1] > newValue[ind+1][1] || (ind==0 && newValue[ind][1]<@skier.positions[0][1]))
-				newValue[ind][1] = newValue[ind][1] + (Math.random()*percentValue*2 - 	percentValue)*newValue[ind][1]/100
-			'''
-			# find new random if the skier must ride up the slope
-			if ind>0 and (newValue[ind][1]>newValue[ind+1][1] or newValue[ind][1]<newValue[ind-1][1])
-				diff = Math.random()*(newValue[ind+1][1] - newValue[ind-1][1]) - (newValue[ind][1] - newValue[ind-1][1])
-				newValue[ind][1] = newValue[ind][1] + diff
+			newValue[ind][0] = newValue[ind][0] + (Math.random()*percentValue*2 - percentValue)*newValue[ind][0]/100
 			
 		@createCopy(newValue)
 		
 	cross: (b) ->
-		@createCopy(([@value[i][0] ,(@value[i][1] + b.value[i][1])/2] for i in [0..@value.length-1]))
+		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1]] for i in [0..@value.length-1]))
 
 @PointTurns = PointTurns
 
