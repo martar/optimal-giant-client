@@ -99,7 +99,7 @@ class Skier
 	###			
 	moveStraightToPoint : ( endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
-		kappa = 0.0001
+		kappa = 0 #0.0000001
 		while !reachedDestination
 			v =Utils.findCoords( endPoint, @positions[0], Utils.vectorLength(@velocities[0]))
 			reachedDestination = @_moveWithArbitraryV(v, kappa, endPoint, accuracy, sign_omega)
@@ -166,7 +166,6 @@ class Skier
 					# can't do it, something went wrong - our phisic model can't handle this
 					throw "I cannot go there with required accuracy!"
 				midResult = result.at([middleTime])[0]
-			
 				# is the intermediate result in the first half of the interval
 				if @_doesHeReach(startPosition, midResult, endPoint)
 					overTime = middleTime
@@ -202,7 +201,7 @@ class Skier
 		a = g * Math.sin(alfa) * cos_beta
 		optimalGiantConstant = 5
 		result = optimalGiantConstant*(Math.sqrt(vLen*vLen+2*a*s) - vLen)/a
-		threshold = 0.001
+		threshold = 10
 		# result can be NaN (division by zero)
 		if not result or result < threshold
 			result = threshold
