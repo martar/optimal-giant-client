@@ -23,38 +23,46 @@ findCoords = (value,length) ->
 	coor.push(vProp*length/(Math.sqrt(1+vProp*vProp)))
 	coor
 
+gates_indices = []
 
 class PointTurns	
-	constructor: (@del_y,count,val,@endPoint,@startPoint=[0,0]) ->
-		propEnd = (@endPoint[1]-@startPoint[1])/(@endPoint[0] - @startPoint[0])
-		x = Math.atan(propEnd)
-		
-		# znajdz punkty dla randomowych prêdkoœci i stwórz pierwsze obiekty populacji
-		randomAngles = (Math.random()* (Math.PI/2 - Math.abs(x)) + Math.abs(x) for i in [1..count])
-		
-		#randomAngles = [Math.PI/2, Math.PI/2 - 0.2, Math.PI/4 + 0.25, Math.PI/4 + 0.3, Math.PI/4 + 0.4]
-		
+	constructor: (@del_y,@count,@val,@gates,@startPoint=[0,0]) ->
 		@idvs = []
-		for angle in randomAngles
-			skier = new solver.Skier(0,null,0,0,null,x0=@startPoint,v0 = findCoords(angle,val))
-			kappa = skier.computeKappa(@endPoint)
-			center = skier.getCircleCenter(@endPoint)
-			points = @getPoints(1/kappa,center)
+		@getInitialPop()
+	
+	getInitialPop: () ->
+		for ind_i in [1..@count]
+			
+			startPoint = null
+			points = []
+			cur_y = @del_y
+			i = 0
+			for gate in @gates
+				if startPoint == null
+					startPoint = @startPoint
+				# set a range for random x's (it can be changed by mutation)
+				if startPoint[0] > gate[0]
+					x_range = [gate[0],startPoint[0]]
+				else
+					x_range = [startPoint[0],gate[0]]
+				
+				# randomize x's between gates each del_y
+				while cur_y < gate[1]
+					points.push([Math.random()*(x_range[1]-x_range[0])+x_range[0],cur_y])
+					cur_y += @del_y
+					i+=1
+				cur_y = gate[1] + @del_y
+				# add gate and memorize its index (needed only in first iteration) 
+				points.push(gate[..])
+				if ind_i == 1
+					gates_indices.push(i)
+				startPoint = gate
+				i+=1
+			skier = new solver.Skier(0,null,0,0,null,x0=@startPoint,v0 = findCoords(0,@val))
+			
+			# postMessage({points:points})
 			@idvs.push(new PointsSet(points,skier))
-		
-	getPoints: (R,center) ->
-		#console.log "ko³o:", R,center
-		cur_y = @startPoint[1] + @del_y
-		# points = [@startPoint]
-		points = []
-		while cur_y < @endPoint[1]
-			x = -Math.sqrt(Math.pow(R,2)-Math.pow((center[1]-cur_y),2)) + center[0]
-			points.push([x,cur_y])
-			cur_y += @del_y
-		points.push(@endPoint[..])
-		#console.log "points:", points
-		points
-
+		# postMessage({unm:gates_indices})
 		
 class PointsSet extends evol.Individual
 	constructor: (points,@skier) ->
@@ -94,13 +102,16 @@ class PointsSet extends evol.Individual
 		
 	mutate: (percentValue) ->
 		indCount = Math.floor(Math.random()*(@value.length-1))
-
+		
 		# deep copy
 		newValue = ([i[0],i[1]] for i in @value)
 		
 		for i in [1..indCount]
-			# do not change endPoint
-			ind = Math.floor(Math.random()*(@value.length-2))
+			# do not change final gate
+			ind = Math.floor(Math.random()*(@value.length-1))
+			# if gate chosen find new index
+			while(ind in gates_indices)
+				ind = Math.floor(Math.random()*(@value.length-1))
 		
 			# change +- percentValue percent
 			newValue[ind][0] = newValue[ind][0] + (Math.random()*percentValue*2 - percentValue)*newValue[ind][0]/100
