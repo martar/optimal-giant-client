@@ -1,7 +1,17 @@
 {
-  "author": "Your Name",
-  "name": "package-name",
-  "description": "Package description",
+  "author": "Ania i Marta",
+  "name": "optimal-giant",
+  "description": "Module for computing and visualizing skier on the slalom",
+  "contributors": [ 
+    {
+      "name": "Marta Ry³ko",
+      "email": "rylko.marta@gmail.com"
+    },
+	 {
+      "name": "Anna Skiba",
+      "email": "annam.skiba@gmail.com"
+    }
+  ],
   "version": "0.0.1",
   "homepage": "",
   "repository": {
@@ -9,13 +19,16 @@
     "url": ""
   },
   "engines": {
-    "node": "~0.6.10 || 0.8 || 0.9"
+    "node": ">=0.6"
   },
   "scripts": {
     "start": "brunch watch --server",
+	"postinstall": "brunch build --minify",
     "test": "brunch test"
   },
   "dependencies": {
+	"statik": ">= 1.1.0", 
+	"brunch": ">= 1.0 < 1.5",
     "javascript-brunch": ">= 1.0 < 1.5",
     "coffee-script-brunch": ">= 1.0 < 1.5",
 
@@ -25,9 +38,8 @@
     "handlebars-brunch": ">= 1.0 < 1.5",
 
     "uglify-js-brunch": ">= 1.0 < 1.5",
-    "clean-css-brunch": ">= 1.0 < 1.5"
-  },
-  "devDependencies": {
+    "clean-css-brunch": ">= 1.0 < 1.5",
+	
     "chai": "1.2.0",
     "sinon": "1.4.2",
     "sinon-chai": "2.1.2"
