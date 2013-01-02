@@ -895,7 +895,7 @@ window.require.define({"views/header_view": function(exports, require, module) {
 }});
 
 window.require.define({"views/home_page_view": function(exports, require, module) {
-  var HomePageView, PageView, template,
+  var HomePageView, PageView, template, zip,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -929,7 +929,8 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.avgFitness = [[]];
       this.bestFitness = [[]];
       this.worstFitness = [[]];
-      this.giantGates = [[5, 5], [0, 10], [5, 15], [4, 20], [7, 25], [3, 27]];
+      this.giantGates = [[5, 5], [0, 10], [5, 15], [4, 20], [5, 25], [2, 30], [7, 35], [3, 44]];
+      this.closedGates = [0, 0, 1, 1, 1, 0, 0, 0, 0];
       return this.work();
     };
 
@@ -964,7 +965,7 @@ window.require.define({"views/home_page_view": function(exports, require, module
     HomePageView.prototype.drawIntermediate = function(data) {
       var pair, x, y, _i, _len, _ref;
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.drawGates(this.giantGates);
+      this.drawGates();
       this.context.beginPath();
       this.context.moveTo(trans(data.best[0][0]), trans(data.best[0][1]));
       _ref = data.best.slice(0);
@@ -977,15 +978,18 @@ window.require.define({"views/home_page_view": function(exports, require, module
       return this.context.stroke();
     };
 
-    HomePageView.prototype.drawGates = function(gates) {
-      var closerDistanceSkierPole, factor, flagWidth, gateWidth, pair, x, y, _i, _len, _ref;
+    HomePageView.prototype.drawGates = function() {
+      var closerDistanceSkierPole, factor, flagWidth, gate, gateWidth, gates, isClosed, pair, x, y, _i, _len, _ref;
+      gates = zip(this.giantGates, this.closedGates);
       flagWidth = 0.75;
       gateWidth = 6;
       closerDistanceSkierPole = 0.2;
       factor = -1;
       _ref = gates.slice(0);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        pair = _ref[_i];
+        gate = _ref[_i];
+        pair = gate[0];
+        isClosed = gate[1];
         this.context.beginPath();
         this.context.lineWidth = 5;
         if (this.toggle) {
@@ -997,11 +1001,17 @@ window.require.define({"views/home_page_view": function(exports, require, module
         y = trans(pair[1]);
         this.context.moveTo(x, y);
         this.context.lineTo(trans(pair[0] + factor * flagWidth), y);
-        this.context.moveTo(trans(pair[0] - factor * gateWidth), y);
-        this.context.lineTo(trans(pair[0] - factor * (gateWidth + flagWidth)), y);
-        this.context.stroke();
-        this.toggle = !this.toggle;
+        if (!isClosed) {
+          this.context.moveTo(trans(pair[0] - factor * gateWidth), y);
+          this.context.lineTo(trans(pair[0] - factor * (gateWidth + flagWidth)), y);
+          this.context.stroke();
+        } else {
+          this.context.moveTo(x, trans(pair[1] + gateWidth - 2 * flagWidth));
+          this.context.lineTo(trans(pair[0] + factor * (closerDistanceSkierPole + flagWidth)), trans(pair[1] + gateWidth - 2 * flagWidth));
+          this.context.stroke();
+        }
         factor = factor * (-1);
+        this.toggle = !this.toggle;
       }
       this.context.lineWidth = 1;
       return this.context.strokeStyle = 'black';
@@ -1041,11 +1051,9 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.worker.onmessage = function(event) {
         if (event.data.type === 'final') {
           _this.draw(event.data);
-          console.log(event.data);
           return _this.renderResults(event.data);
         } else if (event.data.type === 'intermediate') {
-          _this.drawIntermediate(event.data);
-          return console.log(event.data);
+          return _this.drawIntermediate(event.data);
         } else if (event.data.type === "stats") {
           return _this.processStatistics(event.data);
         } else {
@@ -1060,6 +1068,33 @@ window.require.define({"views/home_page_view": function(exports, require, module
     return HomePageView;
 
   })(PageView);
+
+  zip = function() {
+    var arr, i, length, lengthArray, _i, _results;
+    lengthArray = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        arr = arguments[_i];
+        _results.push(arr.length);
+      }
+      return _results;
+    }).apply(this, arguments);
+    length = Math.min.apply(Math, lengthArray);
+    _results = [];
+    for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+      _results.push((function() {
+        var _j, _len, _results1;
+        _results1 = [];
+        for (_j = 0, _len = arguments.length; _j < _len; _j++) {
+          arr = arguments[_j];
+          _results1.push(arr[i]);
+        }
+        return _results1;
+      }).apply(this, arguments));
+    }
+    return _results;
+  };
   
 }});
 
@@ -1199,7 +1234,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<div id=\"stats_plots\" style=\"width:400px; height:300px;\">\r\n</div>\r\n<ul id=\"results\"></ul>\r\n<canvas id=\"slope\" width=\"1000\" height=\"1000\"></canvas>\r\n\r\n\r\n\r\n";});
+    return "\r\n<ul id=\"results\"></ul>\r\n<canvas id=\"slope\" width=\"3000\" height=\"2000\"></canvas>\r\n<div id=\"stats_plots\" style=\"width:400px; height:300px;\">\r\n</div>\r\n\r\n\r\n\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
