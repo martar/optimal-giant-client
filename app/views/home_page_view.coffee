@@ -64,7 +64,7 @@ module.exports = class HomePageView extends PageView
 				@draw event.data
 				console.log event.data
 				@renderResults event.data
-			else if (event.data.type == 'intermediate')
+			else if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
 				console.log event.data
