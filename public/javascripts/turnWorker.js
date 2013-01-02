@@ -6,12 +6,11 @@
   importScripts('solver.js');
 
   self.onmessage = function(ev) {
-    var a, best, bestsAndWorstInIterations, crossNr, duration, endPoint, mutateProb, pop, populationCount, skier, skiers, start, vLen;
+    var a, best, bestsAndWorstInIterations, crossNr, duration, mutateProb, pop, populationCount, skier, skiers, start, vLen;
     start = Date.now();
     populationCount = 20;
     vLen = 0.1;
-    endPoint = [[5, 5], [0, 10], [5, 15], [4, 20], [7, 25], [3, 30]];
-    pop = new PointTurns(1, populationCount, vLen, endPoint);
+    pop = new PointTurns(1, populationCount, vLen, ev.data.gates);
     crossNr = 6;
     mutateProb = 1;
     bestsAndWorstInIterations = new Optimization(pop, crossNr, mutateProb).compute();
