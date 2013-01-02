@@ -158,7 +158,7 @@ class Optimization
 			@popul.idvs = @popul.idvs[0..(@size-1)]
 			
 			i+=1
-			@stats.feed(@popul.idvs)
+			#@stats.feed(@popul.idvs)
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness

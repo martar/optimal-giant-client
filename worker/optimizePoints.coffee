@@ -80,6 +80,38 @@ class PointsSet extends evol.Individual
 		else @skier.velocities
 		@computeFitness()
 	
+	computePunishment:(positions) =>
+		i = 0
+		# compute the second derivative
+		diff = []
+		while (i < positions.length-2)
+			[x3,y3] = positions[i+2]
+			[x2,y2] = positions[i+1]
+			[x1,y1] = positions[i]
+			denominator = (y3-y2)*(y2-y1)
+			numerator = x1 + x3 - 2*x2
+			diff.push numerator/denominator
+			i+=1
+		# apply the punishment
+		i = 0
+		punish = []
+		punish.push  diff[0]
+		magicalFactor = 1.5
+		while (i < diff.length-1)
+			next = diff[i+1]
+			curr = diff[i]
+			# if the signs of the neighbour steps are diffrent, punish the next step by some factor (because it takes more time to change the edges that to simply sline in the same turn
+			punishment = diff[i+1]
+			if (next*curr<0)
+				punishment = punishment* magicalFactor
+			punish.push punishment
+			i+=1
+		# it's important to punish more the bigger values of derivatives than sum of smaller values of derivatives,
+		# so we take the 
+		punish = (Math.abs(item)* item * item for item in punish)
+		sum = punish.reduce (t, s) -> t + s
+		sum
+		
 	computeFitness: () ->
 		if @fitness
 			return @fitness
@@ -89,8 +121,10 @@ class PointsSet extends evol.Individual
 
 		for nextPos in @value
 			@skier.moveStraightToPoint(nextPos, 0.001)
+			
+		factor = @computePunishment(@skier.positions)
 		#console.log "czas: ", t
-		@fitness = @skier.result
+		@fitness = factor * @skier.result
 		
 	createCopy: (changedPoints) ->
 		skierPos = @skier.getPositions()
