@@ -1,10 +1,7 @@
-#try
-
 importScripts './underscore.js'
 importScripts './solver.js'	
 importScripts './evolutionAlgorithm.js'
-
-
+importScripts './gauss.js'
 evol = {}
 evol.Individual = Individual
 solver = {}
@@ -13,8 +10,9 @@ solver.Skier = Skier
 _ = require('./underscore.js')
 solver = require('./solver.js')
 evol = require('./evolutionAlgorithm.js')
+gauss = require('./gauss.js')
 ###
-	
+
 findCoords = (value,length) ->
 	coor = []
 	vProp = Math.tan(value)
@@ -25,12 +23,14 @@ findCoords = (value,length) ->
 
 gates_indices = []
 
-class PointTurns	
+class PointTurns
 	constructor: (@del_y,@count,@val,@gates,@startPoint=[0,0]) ->
 		@idvs = []
 		@getInitialPop()
 	
 	getInitialPop: () ->
+		# initial deviation
+		init_dev = 1
 		for ind_i in [1..@count]
 			
 			startPoint = null
@@ -48,7 +48,8 @@ class PointTurns
 				
 				# randomize x's between gates each del_y
 				while cur_y < gate[1]
-					points.push([Math.random()*(x_range[1]-x_range[0])+x_range[0],cur_y])
+					points.push([Math.random()*(x_range[1]-x_range[0])+x_range[0],cur_y,init_dev])
+					
 					cur_y += @del_y
 					i+=1
 				cur_y = gate[1] + @del_y
@@ -77,7 +78,6 @@ class PointsSet extends evol.Individual
 			@skier.positions = [pos[0],pos[1]]
 			vel = @skier.getVelocities().reverse()[0]
 			@skier.velocities = [vel[0],vel[1]]
-		else @skier.velocities
 		@computeFitness()
 	
 	computePunishment:(positions) =>
@@ -133,12 +133,18 @@ class PointsSet extends evol.Individual
 		firstVel = skierVel[skierVel.length-1]
 		
 		new PointsSet(changedPoints, new solver.Skier(0, null, 0, 0, null, x0=[firstPos[0], firstPos[1] ],v0=[firstVel[0],firstVel[1]]))
-		
-	mutate: (percentValue) ->
+	
+	'''
+	mutate individual
+	gaussAll - nrand value used for whole population in one iteration
+	tau, tau_prim - parameters of evolutionary algorithm
+	'''
+	mutate: (gaussAll, tau, tau_prim) ->
+	
 		indCount = Math.floor(Math.random()*(@value.length-1))
 		
 		# deep copy
-		newValue = ([i[0],i[1]] for i in @value)
+		newValue = ([i[0],i[1],i[2]] for i in @value)
 		
 		for i in [1..indCount]
 			# do not change final gate
@@ -147,13 +153,21 @@ class PointsSet extends evol.Individual
 			while(ind in gates_indices)
 				ind = Math.floor(Math.random()*(@value.length-1))
 		
-			# change +- percentValue percent
-			newValue[ind][0] = newValue[ind][0] + (Math.random()*percentValue*2 - percentValue)*newValue[ind][0]/100
+			gauss = Math.nrand()
 			
+			# mutate sigma
+			newValue[ind][2] = newValue[ind][2] * Math.exp(tau_prim*gaussAll + tau*gauss)
+			
+			gauss = Math.nrand()			
+			diff = newValue[ind][2]*gauss
+			
+			newValue[ind][0] += diff
+		#postMessage({inds:inds})
 		@createCopy(newValue)
 		
 	cross: (b) ->
-		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1]] for i in [0..@value.length-1]))
+		# TODO cross the sigma??
+		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1], @value[i][2]] for i in [0..@value.length-1]))
 
 @PointTurns = PointTurns
 
