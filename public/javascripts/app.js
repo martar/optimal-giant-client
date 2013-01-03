@@ -929,8 +929,8 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.avgFitness = [[]];
       this.bestFitness = [[]];
       this.worstFitness = [[]];
-      this.giantGates = [[5, 5], [0, 10], [5, 15], [4, 20], [5, 25], [2, 30], [7, 35], [3, 44]];
-      this.closedGates = [0, 0, 1, 1, 1, 0, 0, 0, 0];
+      this.giantGates = [[5, 13], [0, 26], [5, 39], [4, 44], [5, 49], [0, 62], [5, 75], [6, 77], [3, 80], [0, 93]];
+      this.closedGates = [0, 0, 1, 1, 1, 0, 0, 0, 0, 0];
       return this.work();
     };
 
@@ -1234,7 +1234,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "\r\n<ul id=\"results\"></ul>\r\n<canvas id=\"slope\" width=\"3000\" height=\"2000\"></canvas>\r\n<div id=\"stats_plots\" style=\"width:400px; height:300px;\">\r\n</div>\r\n\r\n\r\n\r\n";});
+    return "\r\n<ul id=\"results\"></ul>\r\n<canvas id=\"slope\" width=\"3000px\" height=\"5000px\"></canvas>\r\n<div id=\"stats_plots\" style=\"width:400px; height:300px;\">\r\n</div>\r\n\r\n\r\n\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

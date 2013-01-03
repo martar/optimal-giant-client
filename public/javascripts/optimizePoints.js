@@ -134,7 +134,7 @@
       i = 0;
       punish = [];
       punish.push(diff[0]);
-      magicalFactor = 1.5;
+      magicalFactor = 4;
       while (i < diff.length - 1) {
         next = diff[i + 1];
         curr = diff[i];
