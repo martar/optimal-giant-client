@@ -97,11 +97,11 @@ class Skier
 	Move the skier to the endPoint going in the straight line (kappa ~ 0).  It changes the skier inner state. It is not confirmed that the skier really 
 	managed to reach the proximity of that point
 	###			
-	moveStraightToPoint : ( endPoint, accuracy = 0.01, sign_omega = 1) ->
+	moveStraightToPoint : ( punishFactor, endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
 		kappa = 0 #0.0000001
 		while !reachedDestination
-			v =Utils.findCoords( endPoint, @positions[0], Utils.vectorLength(@velocities[0]))
+			v =Utils.findCoords( endPoint, @positions[0], punishFactor*Utils.vectorLength(@velocities[0]))
 			reachedDestination = @_moveWithArbitraryV(v, kappa, endPoint, accuracy, sign_omega)
 	###
 	Compute new kappa that is required so that the skier read the endPoint taking current velocity vector into account. It is not guaranted that the skier really 

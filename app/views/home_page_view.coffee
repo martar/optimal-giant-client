@@ -15,9 +15,11 @@ module.exports = class HomePageView extends PageView
 		@worstFitness = [[]]
 
 		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[5,25], [2,30],[7,35], [3,44]]
+		#@giantGates = [[5,5],[0,7],[5,15], [4,20],[5,25], [2,30]]
+		
 		@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62], [5,75], [6,77], [3,80], [0,93]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
-		#@closedGates = [0,0,1,1,1,0,0,0]
+		#@closedGates = [0,0,1,1,1,0]
 		@closedGates = [0,0,1,1,1,0,0,0,0,0]
 		
 		@work()
@@ -103,15 +105,17 @@ module.exports = class HomePageView extends PageView
 		plot1.redraw()
 	
 	work: () =>
+		i=0
 		@worker.onmessage = (event) =>
+			i += 1
 			if (event.data.type == 'final')
 				@draw event.data
 				#console.log event.data
 				@renderResults event.data
-			else if(event.data.type == 'intermediate')
+			else if(event.data.type == 'intermediate' and i % 10 == 0)
 				# clear the canvas
 				@drawIntermediate event.data
-				#console.log event.data
+				# console.log event.data
 			else if (event.data.type == "stats")
 				@processStatistics event.data
 			else

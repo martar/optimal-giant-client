@@ -111,20 +111,60 @@ class PointsSet extends evol.Individual
 		punish = (Math.abs(item)* item * item for item in punish)
 		sum = punish.reduce (t, s) -> t + s
 		sum
-		
+
+	punishFuntion: (angle) =>
+		# angle between 0 and 180 degrees
+		if angle <= 90
+			return 0.01
+		else
+			1-Math.pow((angle/180.0)-1.5,6)
+			
+	computePunishFactor: (positions) =>
+		i= 0
+		punishFactors = []
+		angles = []
+		punishFactors.push 1
+		while i < positions.length - 2
+			a = positions[i]
+			b = positions[i+1]
+			c = positions[i+2]
+			abx = b[0] - a[0]
+			aby = b[1] - a[1]
+			cbx = b[0] - c[0]
+			cby = b[1] - c[1]
+			angba = Math.atan2(aby, abx)
+			angbc = Math.atan2(cby, cbx)
+			rslt = angba - angbc
+			angle = (rslt * 180) / 3.141592
+			if angle > 180
+				angle = 360 - angle
+			punishFactors.push @punishFuntion(angle)
+			i += 1
+		punishFactors.push 1
+		punishFactors
+
+	
 	computeFitness: () ->
 		if @fitness
 			return @fitness
 		interval = 0.1
 		t = 0
 		@min = 100000
-
-		for nextPos in @value
-			@skier.moveStraightToPoint(nextPos, 0.001)
-			
+		
+		#@decreaseVelocityPunishment()
+		@mySumPunishment()
+		
+	mySumPunishment: () ->
+		for nextPos, index in @value
+			@skier.moveStraightToPoint(1, nextPos, 0.001)
 		factor = @computePunishment(@skier.positions)
-		#console.log "czas: ", t
-		@fitness = factor * @skier.result
+		@fitness = factor*@skier.result
+	
+	decreaseVelocityPunishment: () ->
+		punishFactors = @computePunishFactor(@value)
+		for nextPos, index in @value
+			@skier.moveStraightToPoint(punishFactors[index], nextPos, 0.001)
+		@fitness = @skier.result
 		
 	createCopy: (changedPoints) ->
 		skierPos = @skier.getPositions()

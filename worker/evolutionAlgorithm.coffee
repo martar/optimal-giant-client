@@ -6,6 +6,8 @@ importScripts './gauss.js'
 ###
 _ = require('./underscore.js')
 require('./solver.js')
+require('./gauss.js')
+require('./statistics.js')
 ###
 
 K = 1
@@ -167,8 +169,6 @@ class Optimization
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
-			trol = 
-			postMessage {type: 'intermediate', best:@popul.idvs[0].skier.positions}
 			[theBest,theWorst]
 		return bestResults
 	
@@ -203,7 +203,7 @@ class Optimization
 	stop: () ->
 		theWorst = @popul.idvs[@size-1]
 		theBest = @popul.idvs[0]
-		postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
+		# postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
 		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.00001
 		
 @Turns = Turns
