@@ -203,8 +203,9 @@ class Optimization
 	stop: () ->
 		theWorst = @popul.idvs[@size-1]
 		theBest = @popul.idvs[0]
-		postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
-		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.00001
+		postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)}
+		#/theBest.fitness)
+		Math.abs(theBest.fitness - theWorst.fitness) < 0.001
 		
 @Turns = Turns
 @Optimization = Optimization

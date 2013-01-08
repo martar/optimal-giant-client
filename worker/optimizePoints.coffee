@@ -137,19 +137,23 @@ class PointsSet extends evol.Individual
 		newValue = (i.createCopy() for i in @value)
 		
 		for point in newValue
-			# mutate non-gates
-			if point.correct()
-				gauss = Math.nrand()
-				
-				# mutate sigma
-				point.dev = point.dev * Math.exp(tau_prim*gaussAll + tau*gauss)
-				
+			gauss = Math.nrand()
+			
+			# mutate sigma
+			point.dev = point.dev * Math.exp(tau_prim*gaussAll + tau*gauss)
+			
+			gauss = Math.nrand()			
+			diff = point.dev*gauss
+			old_value = point.x
+			point.x += diff
+			c = point.correct()
+			#postMessage({p:point.x,old:old_value,c:c,g:point.gate_x,diff:diff})
+			
+			# if the new value is not correct find another
+			while not point.correct()
 				gauss = Math.nrand()			
 				diff = point.dev*gauss
-				old_value = point.x
-				point.x += diff
-				c = point.correct()
-				#postMessage({p:point.x,old:old_value,c:c,g:point.gate_x,diff:diff})
+				point.x = old_value + diff
 			
 		#postMessage({inds:inds})
 		@createCopy(newValue)

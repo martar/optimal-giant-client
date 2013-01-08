@@ -20,7 +20,10 @@ class Gate extends Point
 		new Gate([[@x,@y],@closed],@left,@dev,@gate_x,@gate_y)
 
 	correct: () ->
-		false
-
+		if @left == 0
+			return @x <= @gate_x+6 and @gate_x <= @x
+		else
+			return @gate_x-6 <= @x and @x <= @gate_x
+		
 @Gate = Gate
 @Point = Point
