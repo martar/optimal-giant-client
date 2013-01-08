@@ -1,14 +1,15 @@
 #importScripts 'evolutionAlgorithm.js'
 importScripts 'optimizePoints.js'
 importScripts 'solver.js'
+importScripts 'gate.js'
 		
 self.onmessage = (ev) ->
 	start = Date.now()
-	populationCount = 20
+	populationCount = 30
 	vLen = 0.1 # 0.0000001
-	
-	pop = new PointTurns(1,populationCount,vLen,ev.data.gates)
-	crossNr = 6
+	gates = (new Gate(gate,i%2) for gate,i in ev.data.gates)
+	pop = new PointTurns(1,populationCount,vLen,gates)
+	crossNr = 10
 	mutateProb = 1
 	bestsAndWorstInIterations = new Optimization(pop,crossNr,mutateProb).compute()
 	
