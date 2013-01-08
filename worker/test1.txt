@@ -1,0 +1,24 @@
+_________________________
+Positions A:
+[ [ 12, 8 ], [ 16, 16 ], [ 12, 24 ], [ 0, 32 ] ]
+Sum punish factor: 0.00585824068032504
+Pure result(no punish): 9.392674958112607
+Pure result WITH REDIUNDANT EDGE CHANGE PUNISH: 9.392674958112607
+Slowing punish result: 10.146103813048857
+Slowing punish result WITH REDIUNDANT EDGE CHANGE PUNISH: 10.146103813048857
+_________________________
+Positions B:
+[ [ 8, 8 ], [ 15.99, 16 ], [ 8, 24 ], [ 0, 32 ] ]
+Sum punish factor: 0.015578496917443308
+Pure result(no punish): 8.272225643820455
+Result WITH REDIUNDANT EDGE CHANGE PUNISH: 8.272225643820455
+Slowing punish result: 11.723153378195455
+Slowing punish result WITH REDIUNDANT EDGE CHANGE PUNISH: 11.723153378195455
+_________________________
+Positions C:
+[ [ 4, 8 ], [ 16, 16 ], [ 15, 24 ], [ 0, 32 ] ]
+Sum punish factor: 0.020824539369758897
+Pure result(no punish): 7.914077231730438
+Result WITH REDIUNDANT EDGE CHANGE PUNISH: 9.914077231730438
+Slowing punish result: 9.522498638683727
+Slowing punish result WITH REDIUNDANT EDGE CHANGE PUNISH: 11.522498638683727

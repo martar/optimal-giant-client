@@ -23,10 +23,7 @@ module.exports = class HomePageView extends PageView
 		#@closedGates = [0,0,1,1,0,0]
 		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
 		@closedGates = [0,0,1,1,0,0]
-		
 		@work()
-		
-
 
 	trans = (coord) -> Math.round (coord*10+200	)
 	

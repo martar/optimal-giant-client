@@ -96,7 +96,7 @@ class PointsSet extends evol.Individual
 		i = 0
 		punish = []
 		punish.push  diff[0]
-		magicalFactor = 1.5
+		magicalFactor = 3
 		while (i < diff.length-1)
 			next = diff[i+1]
 			curr = diff[i]
@@ -157,7 +157,7 @@ class PointsSet extends evol.Individual
 	mySumPunishment: () ->
 		for nextPos, index in @value
 			@skier.moveStraightToPoint(1, nextPos, 0.001)
-		factor = @computePunishment(@skier.positions)
+		factor = @computePunishment(@value)
 		@fitness = factor*@skier.result
 	
 	decreaseVelocityPunishment: () ->
