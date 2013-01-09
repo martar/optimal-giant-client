@@ -21,10 +21,10 @@ module.exports = class HomePageView extends PageView
 		@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
 		#@closedGates = [0,0,1,1,0,0]
+		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
 		@closedGates = [0,0,1,1,0,0]
 		
-		@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62], [5,75], [6,77], [3,80], [0,93]]
-		@closedGates = [0,0,1,1,1,0,0,0,0,0]
+		
 		@work()
 
 	trans = (coord) -> Math.round (coord*10+200	)

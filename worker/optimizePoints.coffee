@@ -167,8 +167,8 @@ class PointsSet extends evol.Individual
 		
 		#@decreaseVelocityPunishment()
 		#@decreaseVelocityPunishmentWithEgdeChangePunis()
-		#@mySumPunishment()
-		@mySumPunishmentWithEgdeChangePunish()
+		@mySumPunishment()
+		#@mySumPunishmentWithEgdeChangePunish()
 	
 	# number of gates besides START ans META
 	computeRedundantEdgeChangePunish = (numberOfEdgeChange, numberOfGates) =>
