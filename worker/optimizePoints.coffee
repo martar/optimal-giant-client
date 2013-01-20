@@ -86,7 +86,18 @@ class PointsSet extends evol.Individual
 			return 0.01
 		else
 			1-Math.pow((angle/180.0)-1.5,6)
-		
+			
+	punishFuntion2 = (angle) =>
+		# angle between 0 and 180 degrees
+		if angle <= 90
+			return 0.01
+		else
+			2*(angle/180)-1		
+
+	punishFuntion3 = (angle) =>
+		# angle between 0 and 180 degrees
+		(angle/180)^10		
+			
 	computePunishFactor :(positions) =>
 		i= 0
 		punishFactors = []
@@ -120,7 +131,7 @@ class PointsSet extends evol.Individual
 		for angle in angles
 			if angle > 180
 				angle = 360 - angle
-			punishFactors.push punishFuntion(angle)
+			punishFactors.push punishFuntion3(angle)
 			
 		punishFactors.push 1
 		{ punishFactors: punishFactors, numberOfEdgeChange: numberOfEdgeChange}
@@ -167,8 +178,8 @@ class PointsSet extends evol.Individual
 		
 		#@decreaseVelocityPunishment()
 		#@decreaseVelocityPunishmentWithEgdeChangePunis()
-		@mySumPunishment()
-		#@mySumPunishmentWithEgdeChangePunish()
+		#@mySumPunishment()
+		@mySumPunishmentWithEgdeChangePunish()
 	
 	# number of gates besides START ans META
 	computeRedundantEdgeChangePunish = (numberOfEdgeChange, numberOfGates) =>
@@ -184,7 +195,6 @@ class PointsSet extends evol.Individual
 			@skier.moveStraightToPoint(1, nextPos, 0.001)
 		result = @computePunishment(@value)
 		factor = result.sum
-		# FIXME fixed 5 
 		@fitness = factor*@skier.result
 	
 	mySumPunishmentWithEgdeChangePunish: () ->
