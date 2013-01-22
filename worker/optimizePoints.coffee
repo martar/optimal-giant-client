@@ -259,8 +259,7 @@ class PointsSet extends evol.Individual
 		@createCopy(newValue)
 		
 	cross: (b) ->
-		# TODO cross the sigma??
-		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1], @value[i][2]] for i in [0..@value.length-1]))
+		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1], (@value[i][2]+b.value[i][2])/2] for i in [0..@value.length-1]))
 
 @PointTurns = PointTurns
 
