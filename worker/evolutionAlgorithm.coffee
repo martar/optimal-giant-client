@@ -128,8 +128,9 @@ class Optimization
 		initial population
 		number of the elements to be crossed in each iteration
 		mutationProb = 1/probability of the mutation of each element
+		lambda is the size of temp population
 	'''
-	constructor: (@popul,@nrOfCrossed,@mutationProb) ->
+	constructor: (@popul,@nrOfCrossed,@mutationProb,@lambda) ->
 		@size = @popul.idvs.length
 		@stats = new Stats()
 		@tau = tau(@size)
@@ -143,20 +144,21 @@ class Optimization
 		@popul.idvs = _.sortBy(@popul.idvs,'fitness')
 		
 		bestResults = while not @stop()
-
+			temp_popul = @createTemp()
+			
 			# cross initial population
-			crossedInd = @crossPop()
+			crossedInd = @crossPop(temp_popul)
 			
 			# mutate initial population
-			mutatedInd = @mutatePop()
+			mutatedInd = @mutatePop(temp_popul)
 
 			# add crossed and mutated inds to population
 			for ind in crossedInd
-				@popul.idvs.push(ind)	
-				postMessage {type: 'intermediate', best:ind.skier.positions}
+				@popul.idvs.push(ind)
+				#postMessage {type: 'intermediate', best:ind.skier.positions}
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
-				postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
+				#postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
 				
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
@@ -169,27 +171,30 @@ class Optimization
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
+			postMessage(type:'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value )
 			[theBest,theWorst]
 		return bestResults
 	
 	'''
 	Do nrOfCrossed crossings between random individuals
 	'''
-	crossPop: () ->
+	crossPop: (temp) ->
+		#postMessage({temp:temp})
 		newInd = []
 		if @nrOfCrossed < 1
 			return newInd
 		for it in [1..@nrOfCrossed]
-			i = Math.floor(Math.random()*@size)
-			j = Math.floor(Math.random()*@size)
-			a = @popul.idvs[i].cross(@popul.idvs[j])
+			i = Math.floor(Math.random()*temp.length)
+			j = Math.floor(Math.random()*temp.length)
+			#postMessage({i:i,j:j})
+			a = temp[i].cross(temp[j])
 			newInd.push(a)
 		newInd
 	
-	mutatePop: () ->
+	mutatePop: (temp) ->
 		mutIds = []
 		gaussAll = Math.nrand()
-		for ind in @popul.idvs
+		for ind in temp
 			# 1/mutationProb chance for mutation
 			ifMut = Math.floor(Math.random()*@mutationProb)
 			if ifMut%@mutationProb==0
@@ -205,6 +210,18 @@ class Optimization
 		theBest = @popul.idvs[0]
 		# postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
 		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.00001
+	
+	'''
+	create @lambda copies of the main population
+	'''
+	createTemp: () ->
+		temp = []
+		for i in [0..@lambda]
+			ind = Math.floor(Math.random()*@size)
+			tempInd = @popul.idvs[ind]
+			c = tempInd.createCopy(tempInd.value[..])
+			temp.push(c)
+		temp
 		
 @Turns = Turns
 @Optimization = Optimization

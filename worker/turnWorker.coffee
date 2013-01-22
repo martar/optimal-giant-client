@@ -7,10 +7,11 @@ self.onmessage = (ev) ->
 	populationCount = 20
 	vLen = 0.1 # 0.0000001
 	
-	pop = new PointTurns(3,populationCount,vLen,ev.data.gates)
-	crossNr = 6
+	pop = new PointTurns(4,populationCount,vLen,ev.data.gates)
+	crossNr = 40
 	mutateProb = 1
-	bestsAndWorstInIterations = new Optimization(pop,crossNr,mutateProb).compute()
+	lambda = 100
+	bestsAndWorstInIterations = new Optimization(pop,crossNr,mutateProb,lambda).compute()
 	
 	skiers = (best.skier for best in pop.idvs)
 	
