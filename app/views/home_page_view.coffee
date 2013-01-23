@@ -100,8 +100,14 @@ module.exports = class HomePageView extends PageView
 			@bestFitness.push( [@bestFitness.length, data.value])
 		else if (data.plugin == "WorstFitness")
 			@worstFitness.push( [@worstFitness.length, data.value])
+		
 		plot1 = $.jqplot('stats_plots',  [@avgFitness, @bestFitness, @worstFitness], {
-			title:"Live alg stats: best, avg and worst fitness in population"
+			title:"Live alg stats: best, avg and worst fitness in population",
+			cursor:{ 
+				show: true,
+				zoom:true, 
+				showTooltip:false
+			} 
 		})
 		plot1.redraw()
 	
@@ -117,10 +123,10 @@ module.exports = class HomePageView extends PageView
 				# clear the canvas
 				@drawIntermediate event.data
 				# console.log event.data
-			else if (event.data.type == "stats")
+			else if (event.data.type == "stats" and i % 10 == 0)
 				@processStatistics event.data
 			else
-				console.log event.data
+				# console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage({gates:@giantGates})
 	
