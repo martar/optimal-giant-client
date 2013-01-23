@@ -1,6 +1,73 @@
 template = require 'views/templates/home'
 PageView = require 'views/base/page_view'
 
+###
+This is stupid. But without some set of initial data, the chart doesn't update well later on
+###
+dataGen = () ->
+	data = []
+	time = (new Date()).getTime()
+	for i in [-19..0] by 1
+		data.push({
+			x: time + i * 1000,
+			y: 11
+		})
+	data
+	
+fu = () ->
+	chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'stats_container',
+			type: 'spline',
+			marginRight: 10
+
+		},
+		title: {
+			text: 'Live skier data'
+		},
+		xAxis: {
+			type: 'datetime',
+			tickPixelInterval: 150
+		},
+		yAxis: {
+			title: {
+				text: 'Value'
+			},
+			plotLines: [{
+				value: 0,
+				width: 1,
+				color: '#808080'
+			},
+			{
+				value: 0,
+				width: 1,
+				color: 'red'
+			},
+			{
+				value: 0,
+				width: 1,
+				color: 'yellow'
+			}]
+
+		},
+
+		legend: {
+			enabled: true
+		},
+
+		exporting: {
+			enabled: false
+		},
+		
+		series: [
+			{name: 'AverageFitness',data: dataGen()},
+			{name:'Best Fitness', data: dataGen()},
+			{name:'Worst Fitness', data: dataGen()},
+			]
+	})
+	chart
+
+
 module.exports = class HomePageView extends PageView
 	template: template
 	className: 'home-page'
@@ -13,7 +80,11 @@ module.exports = class HomePageView extends PageView
 		@avgFitness = [[]]
 		@bestFitness = [[]]
 		@worstFitness = [[]]
-
+		@chart = fu()
+		Highcharts.setOptions({
+            global: { useUTC: false}
+		})
+		
 		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[5,25], [2,30],[7,35], [3,44]]
 		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[7,25], [0, 30]]
 		
@@ -27,17 +98,18 @@ module.exports = class HomePageView extends PageView
 		
 		@work()
 
-	trans = (coord) -> Math.round (coord*10+200	)
+	transX = (coord) -> Math.round (coord*10+100)
+	transY = (coord) -> Math.round (coord*10+100)	
 	
 	draw: (data) ->
 		for skier in data.skiers
 			skier.color ?= "black"
 			@context.strokeStyle = skier.color
 			@context.beginPath()
-			@context.moveTo trans(skier.positions[0][0]),trans(skier.positions[0][1])
+			@context.moveTo transX(skier.positions[0][0]),transY(skier.positions[0][1])
 			for pair in skier.positions[0..]
-				x = trans(pair[0])
-				y = trans(pair[1])
+				x = transX(pair[0])
+				y = transY(pair[1])
 				@context.lineTo x, y
 			@context.stroke()
   
@@ -45,10 +117,10 @@ module.exports = class HomePageView extends PageView
 		@context.clearRect(0, 0, @canvas.width, @canvas.height)
 		@drawGates()
 		@context.beginPath()
-		@context.moveTo trans(data.best[0][0]),trans(data.best[0][1])
+		@context.moveTo transX(data.best[0][0]),transY(data.best[0][1])
 		for pair in data.best[0..]
-			x = trans(pair[0])
-			y = trans(pair[1])
+			x = transX(pair[0])
+			y = transY(pair[1])
 			@context.lineTo x, y
 		@context.stroke()
 			
@@ -68,19 +140,19 @@ module.exports = class HomePageView extends PageView
 				@context.strokeStyle = 'blue'
 			else
 				@context.strokeStyle = 'red'
-			x = trans(pair[0]+factor* closerDistanceSkierPole)
-			y = trans(pair[1])
+			x = transX(pair[0]+factor* closerDistanceSkierPole)
+			y = transY(pair[1])
 			@context.moveTo x,y
-			@context.lineTo trans(pair[0]+factor*flagWidth), y
+			@context.lineTo transX(pair[0]+factor*flagWidth), y
 			if (!isClosed)
-				@context.moveTo trans(pair[0]-factor*gateWidth), y
-				@context.lineTo trans(pair[0]-factor*(gateWidth + flagWidth)), y
+				@context.moveTo transX(pair[0]-factor*gateWidth), y
+				@context.lineTo transX(pair[0]-factor*(gateWidth + flagWidth)), y
 				@context.stroke()
 				
 			else
 				# closed gate so put the gate in the line of the slope
-				@context.moveTo x, trans(pair[1] + gateWidth - 2*flagWidth)
-				@context.lineTo trans(pair[0]+factor* (closerDistanceSkierPole+flagWidth)),trans(pair[1] + gateWidth - 2*flagWidth)
+				@context.moveTo x, transX(pair[1] + gateWidth - 2*flagWidth)
+				@context.lineTo transX(pair[0]+factor* (closerDistanceSkierPole+flagWidth)),transY(pair[1] + gateWidth - 2*flagWidth)
 				@context.stroke()
 				# do not toggle the color
 			factor = factor*(-1)
@@ -95,21 +167,11 @@ module.exports = class HomePageView extends PageView
 	
 	processStatistics: (data) =>
 		if (data.plugin == "AverageFitness")
-			@avgFitness.push( [@avgFitness.length, data.value])
+			@chart.series[0].addPoint([(new Date()).getTime(), data.value], false, true)
 		else if (data.plugin == "BestFitness")
-			@bestFitness.push( [@bestFitness.length, data.value])
+			@chart.series[1].addPoint([(new Date()).getTime(), data.value], false, true)
 		else if (data.plugin == "WorstFitness")
-			@worstFitness.push( [@worstFitness.length, data.value])
-		
-		plot1 = $.jqplot('stats_plots',  [@avgFitness, @bestFitness, @worstFitness], {
-			title:"Live alg stats: best, avg and worst fitness in population",
-			cursor:{ 
-				show: true,
-				zoom:true, 
-				showTooltip:false
-			} 
-		})
-		plot1.redraw()
+			@chart.series[2].addPoint([(new Date()).getTime(), data.value], true, true)
 	
 	work: () =>
 		i=0
@@ -117,8 +179,8 @@ module.exports = class HomePageView extends PageView
 			i += 1
 			if (event.data.type == 'final')
 				@draw event.data
-				#console.log event.data
-				@renderResults event.data
+				# console.log event.data
+				# @renderResults event.data
 			else if(event.data.type == 'intermediate' and i % 10 == 0)
 				# clear the canvas
 				@drawIntermediate event.data

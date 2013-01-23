@@ -15,9 +15,12 @@ exports.config =
           'vendor/scripts/jquery-1.8.2.js',
           'vendor/scripts/underscore-1.4.0.js',
           'vendor/scripts/backbone-0.9.2.js',
+          'vendor/scripts/bootstrap.min.js',
           'vendor/scripts/jquery.jqplot.js',
           'vendor/scripts/jquery.jqplot.cursor.js',
-          'vendor/scripts/jquery.jqplot.dateAxisRenderer.js'
+          'vendor/scripts/jquery.jqplot.dateAxisRenderer.js',
+          'vendor/scripts/jquery.highcharts.a',
+          'vendor/scripts/jquery.highcharts.exporting'
         ]
 
     stylesheets:
