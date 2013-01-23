@@ -135,6 +135,9 @@ class Optimization
 		@stats = new Stats()
 		@tau = tau(@size)
 		@tau_prim = tau_prim(@size)
+		@last_best = 100000
+		@it_nr = 0
+		@max_unchanged_best = 10
 	'''
 	The core function which mainpulates the population to find the best individual
 	'''
@@ -206,10 +209,18 @@ class Optimization
 	Stoping condition
 	'''
 	stop: () ->
-		theWorst = @popul.idvs[@size-1]
-		theBest = @popul.idvs[0]
-		# postMessage {type:"",b:theBest.fitness, w:theWorst.fitness, diff:(theBest.fitness - theWorst.fitness)/theBest.fitness }
-		(Math.abs(theBest.fitness - theWorst.fitness)/theBest.fitness) < 0.00001
+		theWorst = @popul.idvs[@size-1].fitness
+		theBest = @popul.idvs[0].fitness
+		
+		if @last_best == theBest
+			@it_nr+=1
+		else
+			@last_best = theBest
+			@it_nr = 1
+		
+		pop_diff = Math.abs(theBest - theWorst)/theBest
+		postMessage({diff:pop_diff, itNum:@it_nr})
+		pop_diff < 0.001 and @it_nr == @max_unchanged_best
 	
 	'''
 	create @lambda copies of the main population
