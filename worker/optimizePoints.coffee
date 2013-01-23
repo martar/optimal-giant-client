@@ -234,27 +234,24 @@ class PointsSet extends evol.Individual
 	'''
 	mutate: (gaussAll, tau, tau_prim) ->
 	
-		indCount = Math.floor(Math.random()*(@value.length-1))
+		indCount = @value.length
 		
 		# deep copy
 		newValue = ([i[0],i[1],i[2]] for i in @value)
 		
-		for i in [1..indCount]
-			# do not change final gate
-			ind = Math.floor(Math.random()*(@value.length-1))
-			# if gate chosen find new index
-			while(ind in gates_indices)
-				ind = Math.floor(Math.random()*(@value.length-1))
-		
-			gauss = Math.nrand()
-			
-			# mutate sigma
-			newValue[ind][2] = newValue[ind][2] * Math.exp(tau_prim*gaussAll + tau*gauss)
-			
-			gauss = Math.nrand()			
-			diff = newValue[ind][2]*gauss
-			
-			newValue[ind][0] += diff
+		for ind in [0..indCount-1]
+
+			# change only non-gates
+			if (ind not in gates_indices)
+				gauss = Math.nrand()
+				
+				# mutate sigma
+				newValue[ind][2] = newValue[ind][2] * Math.exp(tau_prim*gaussAll + tau*gauss)
+				
+				gauss = Math.nrand()			
+				diff = newValue[ind][2]*gauss
+				
+				newValue[ind][0] += diff
 		#postMessage({inds:inds})
 		@createCopy(newValue)
 		
