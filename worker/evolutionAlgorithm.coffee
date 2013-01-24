@@ -130,13 +130,14 @@ class Optimization
 		mutationProb = 1/probability of the mutation of each element
 		lambda is the size of temp population
 	'''
-	constructor: (@popul,@nrOfCrossed,@mutationProb,@lambda) ->
+	constructor: (@popul,@mutationProb,@lambda) ->
 		@size = @popul.idvs.length
 		@stats = new Stats()
 		@tau = tau(@size)
 		@tau_prim = tau_prim(@size)
 		@last_best = 100000
 		@it_nr = 0
+		@min_diff = 0.001
 		@max_unchanged_best = 10
 	'''
 	The core function which mainpulates the population to find the best individual
@@ -149,16 +150,13 @@ class Optimization
 		bestResults = while not @stop()
 			temp_popul = @createTemp()
 			
-			# cross initial population
+			# cross temp population
 			crossedInd = @crossPop(temp_popul)
 			
-			# mutate initial population
-			mutatedInd = @mutatePop(temp_popul)
+			# mutate crossed population
+			mutatedInd = @mutatePop(crossedInd)
 
-			# add crossed and mutated inds to population
-			for ind in crossedInd
-				@popul.idvs.push(ind)
-				#postMessage {type: 'intermediate', best:ind.skier.positions}
+			# add mutated inds to population
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
 				#postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
@@ -179,14 +177,14 @@ class Optimization
 		return bestResults
 	
 	'''
-	Do nrOfCrossed crossings between random individuals
+	Do lambda crossings between random individuals
 	'''
 	crossPop: (temp) ->
 		#postMessage({temp:temp})
 		newInd = []
-		if @nrOfCrossed < 1
+		if @lambda < 1
 			return newInd
-		for it in [1..@nrOfCrossed]
+		for it in [1..@lambda]
 			i = Math.floor(Math.random()*temp.length)
 			j = Math.floor(Math.random()*temp.length)
 			#postMessage({i:i,j:j})
@@ -195,15 +193,14 @@ class Optimization
 		newInd
 	
 	mutatePop: (temp) ->
-		mutIds = []
 		gaussAll = Math.nrand()
-		for ind in temp
+		for individual,i in temp
 			# 1/mutationProb chance for mutation
 			ifMut = Math.floor(Math.random()*@mutationProb)
 			if ifMut%@mutationProb==0
 				# mutate ind
-				mutIds.push(ind.mutate(gaussAll, @tau, @tau_prim))
-		mutIds
+				temp[i] = individual.mutate(gaussAll, @tau, @tau_prim)
+		temp	
 	
 	'''
 	Stoping condition
@@ -220,7 +217,7 @@ class Optimization
 		
 		pop_diff = Math.abs(theBest - theWorst)/theBest
 		postMessage({diff:pop_diff, itNum:@it_nr})
-		pop_diff < 0.001 and @it_nr == @max_unchanged_best
+		pop_diff < @min_diff and @it_nr >= @max_unchanged_best
 	
 	'''
 	create @lambda copies of the main population
