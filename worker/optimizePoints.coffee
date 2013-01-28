@@ -2,10 +2,13 @@ importScripts './underscore.js'
 importScripts './solver.js'	
 importScripts './evolutionAlgorithm.js'
 importScripts './gauss.js'
+importScripts './gate.js'
+
 evol = {}
 evol.Individual = Individual
 solver = {}
 solver.Skier = Skier
+
 ###
 _ = require('./underscore.js')
 solver = require('./solver.js')
@@ -13,26 +16,15 @@ evol = require('./evolutionAlgorithm.js')
 gauss = require('./gauss.js')
 ###
 
-findCoords = (value,length) ->
-	coor = []
-	vProp = Math.tan(value)
-	
-	coor.push(length/(Math.sqrt(1+vProp*vProp)))
-	coor.push(vProp*length/(Math.sqrt(1+vProp*vProp)))
-	coor
-
-gates_indices = []
-
 class PointTurns
-	constructor: (@del_y,@count,@val,@gates,@startPoint=[0,0]) ->
+	constructor: (@del_y,@count,@val,@gates,@startPoint=new Point(0,0)) ->
 		@idvs = []
 		@getInitialPop()
 	
 	getInitialPop: () ->
 		# initial deviation
-		init_dev = 1
 		for ind_i in [1..@count]
-			
+			#postMessage({ind:ind_i, c:@count})
 			startPoint = null
 			points = []
 			cur_y = @del_y
@@ -41,29 +33,28 @@ class PointTurns
 				if startPoint == null
 					startPoint = @startPoint
 				# set a range for random x's (it can be changed by mutation)
-				if startPoint[0] > gate[0]
-					x_range = [gate[0],startPoint[0]]
+				if startPoint.x > gate.x
+					x_range = [gate.x,startPoint.x]
 				else
-					x_range = [startPoint[0],gate[0]]
+					x_range = [startPoint.x,gate.x]
 				
 				# randomize x's between gates each del_y
-				while cur_y < gate[1]
-					points.push([Math.random()*(x_range[1]-x_range[0])+x_range[0],cur_y,init_dev])
-					
+				while cur_y < gate.y
+					rand_x = Math.random()*(x_range[1]-x_range[0])+x_range[0]
+					points.push(new Point(rand_x,cur_y))					
 					cur_y += @del_y
 					i+=1
-				cur_y = gate[1] + @del_y
-				# add gate and memorize its index (needed only in first iteration) 
-				points.push(gate[..])
-				if ind_i == 1
-					gates_indices.push(i)
-				startPoint = gate
+					#postMessage({i:i})
+				cur_y = gate.y + @del_y
+				# add gate and memorize its index (needed only in first iteration)
+				points.push(gate.createCopy())
+				startPoint = new Point(gate.x,gate.y)
 				i+=1
-			skier = new solver.Skier(0,null,0,0,null,x0=@startPoint,v0 = findCoords(0,@val))
+			# v0 needs to have @val length, direction is not imported now
+			skier = new solver.Skier(0,null,0,0,null,x0=[@startPoint.x,@startPoint.y],v0 = [0,@val])
 			
-			# postMessage({points:points})
+			#postMessage({points:points})
 			@idvs.push(new PointsSet(points,skier))
-		# postMessage({unm:gates_indices})
 		
 class PointsSet extends evol.Individual
 	constructor: (points,@skier) ->
@@ -74,7 +65,6 @@ class PointsSet extends evol.Individual
 		@value = value
 		if skier?
 			pos = @skier.getPositions().reverse()[0]
-			#console.log pos
 			@skier.positions = [pos[0],pos[1]]
 			vel = @skier.getVelocities().reverse()[0]
 			@skier.velocities = [vel[0],vel[1]]
@@ -192,14 +182,14 @@ class PointsSet extends evol.Individual
 	
 	mySumPunishment: () ->
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(1, nextPos, 0.001)
+			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
 		result = @computePunishment(@value)
 		factor = result.sum
 		@fitness = factor*@skier.result
 	
 	mySumPunishmentWithEgdeChangePunish: () ->
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(1, nextPos, 0.001)
+			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
 		result = @computePunishment(@value)
 		factor = result.sum
 		# FIXME fixed 5 
@@ -209,14 +199,14 @@ class PointsSet extends evol.Individual
 		result = @computePunishFactor([[0,0]].concat @value)
 		punishFactors = result.punishFactors
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], nextPos, 0.001)
+			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.001)
 		@fitness = @skier.result
 		
 	decreaseVelocityPunishmentWithEgdeChangePunis: () ->
 		result = @computePunishFactor([[0,0]].concat @value)
 		punishFactors = result.punishFactors
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], nextPos, 0.001)
+			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.001)
 		@fitness = @skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5)
 		
 	createCopy: (changedPoints) ->
@@ -225,7 +215,7 @@ class PointsSet extends evol.Individual
 		skierVel = @skier.getVelocities()
 		firstVel = skierVel[skierVel.length-1]
 		
-		new PointsSet(changedPoints, new solver.Skier(0, null, 0, 0, null, x0=[firstPos[0], firstPos[1] ],v0=[firstVel[0],firstVel[1]]))
+		new PointsSet(changedPoints, new solver.Skier(0, null, 0, 0, null, x0=[firstPos[0], firstPos[1]],v0=[firstVel[0],firstVel[1]]))
 	
 	'''
 	mutate individual
@@ -233,34 +223,42 @@ class PointsSet extends evol.Individual
 	tau, tau_prim - parameters of evolutionary algorithm
 	'''
 	mutate: (gaussAll, tau, tau_prim) ->
-	
-		indCount = Math.floor(Math.random()*(@value.length-1))
+		#postMessage({c:"mutate"})
+		#indCount = Math.floor(Math.random()*(@value.length-1))
 		
 		# deep copy
-		newValue = ([i[0],i[1],i[2]] for i in @value)
+		newValue = (i.createCopy() for i in @value)
 		
-		for i in [1..indCount]
-			# do not change final gate
-			ind = Math.floor(Math.random()*(@value.length-1))
-			# if gate chosen find new index
-			while(ind in gates_indices)
-				ind = Math.floor(Math.random()*(@value.length-1))
-		
+		for point in newValue
 			gauss = Math.nrand()
 			
 			# mutate sigma
-			newValue[ind][2] = newValue[ind][2] * Math.exp(tau_prim*gaussAll + tau*gauss)
+			point.dev = point.dev * Math.exp(tau_prim*gaussAll + tau*gauss)
 			
 			gauss = Math.nrand()			
-			diff = newValue[ind][2]*gauss
+			diff = point.dev*gauss
+			old_value = point.x
+			point.x += diff
+			c = point.correct()
+			#postMessage({p:point.x,old:old_value,c:c,g:point.gate_x,diff:diff})
 			
-			newValue[ind][0] += diff
+			# if the new value is not correct find another
+			while not point.correct()
+				gauss = Math.nrand()			
+				diff = point.dev*gauss
+				point.x = old_value + diff
+			
 		#postMessage({inds:inds})
 		@createCopy(newValue)
 		
 	cross: (b) ->
 		# TODO cross the sigma??
-		@createCopy(([(@value[i][0] + b.value[i][0])/2, @value[i][1], @value[i][2]] for i in [0..@value.length-1]))
+		crossed_points = []
+		for i in [0..@value.length-1]
+			copy = @value[i].createCopy()
+			copy.x = (@value[i].x + b.value[i].x)/2
+			crossed_points.push copy
+		@createCopy(crossed_points)
 
 @PointTurns = PointTurns
 
