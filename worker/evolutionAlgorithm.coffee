@@ -153,10 +153,10 @@ class Optimization
 			# add crossed and mutated inds to population
 			for ind in crossedInd
 				@popul.idvs.push(ind)	
-				postMessage {type: 'intermediate', best:ind.skier.positions}
+				# postMessage {type: 'intermediate', best:ind.skier.positions}
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
-				postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
+				# postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
 				
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
