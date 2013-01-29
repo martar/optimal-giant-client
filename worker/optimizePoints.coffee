@@ -183,14 +183,14 @@ class PointsSet extends evol.Individual
 	mySumPunishment: () ->
 		for nextPos, index in @value
 			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
-		result = @computePunishment(@value)
+		result = @computePunishment(@skier.positions)
 		factor = result.sum
 		@fitness = factor*@skier.result
 	
 	mySumPunishmentWithEgdeChangePunish: () ->
 		for nextPos, index in @value
 			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
-		result = @computePunishment(@value)
+		result = @computePunishment(@skier.positions)
 		factor = result.sum
 		# FIXME fixed 5 
 		@fitness = factor*(@skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5))
