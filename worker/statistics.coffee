@@ -9,7 +9,7 @@ class AverageFitnessPlugin
 	feed: (fitnessListInPopulation) ->
 		sum = 0
 		for ind in fitnessListInPopulation
-			sum += ind.skier.result
+			sum += ind.fitness
 		postMessage({type: "stats", plugin: "AverageFitness", value: sum/fitnessListInPopulation.length})
 		
 class BestFitnessInPopulationPlugin
@@ -19,8 +19,8 @@ class BestFitnessInPopulationPlugin
 	feed: (fitnessListInPopulation) ->
 		min = null
 		for ind in fitnessListInPopulation
-			if min == null or ind.skier.result < min 
-				min = ind.skier.result
+			if min == null or ind.fitness < min 
+				min = ind.fitness
 		postMessage({type: "stats", plugin: "BestFitness", value: min})
 
 class WorstFitnessInPopulationPlugin
@@ -30,8 +30,8 @@ class WorstFitnessInPopulationPlugin
 	feed: (fitnessListInPopulation) ->
 		min = null
 		for ind in fitnessListInPopulation
-			if min == null or ind.skier.result > min 
-				min = ind.skier.result
+			if min == null or ind.fitness > min 
+				min = ind.fitness
 		postMessage({type: "stats", plugin: "WorstFitness", value: min})
 		
 class Stats
