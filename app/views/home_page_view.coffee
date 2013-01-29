@@ -186,14 +186,14 @@ module.exports = class HomePageView extends PageView
 				@draw event.data
 				# console.log event.data
 				# @renderResults event.data
-			else if(event.data.type == 'intermediate' and i % 10 == 0)
+			if(event.data.type == 'intermediate' and i % 10 == 0)
 				# clear the canvas
 				@drawIntermediate event.data
 				# console.log event.data
-			else if (event.data.type == "stats" and i % 10 == 0)
+			if (event.data.type == "stats")
 				@processStatistics event.data
-			else
-				console.log event.data
+			#else
+			#	#console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage({gates:zip(@giantGates,@closedGates)})
 	
