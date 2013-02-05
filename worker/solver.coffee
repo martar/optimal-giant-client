@@ -80,7 +80,7 @@ class Skier
 	###
 	reset : () ->
 		@velocities = [@velocities[@velocities.length-1]]
-		@positions = [@positions[@positions-1]]
+		@positions = [@positions[@positions.length-1]]
 		@result = 0
 		
 
@@ -260,6 +260,7 @@ root.OptimalGiant = {}
 root.OptimalGiant.Solver = Solver
 
 @Skier = Skier
+@Utils = Utils
 	
 ###
 vstart = [0,0.001]
