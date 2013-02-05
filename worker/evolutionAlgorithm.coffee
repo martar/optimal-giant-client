@@ -137,8 +137,8 @@ class Optimization
 		@tau_prim = tau_prim(@size)
 		@last_best = 100000
 		@it_nr = 0
-		@min_diff = 0.001
-		@max_unchanged_best = 10
+		@min_diff = 0.1
+		@max_unchanged_best = 7
 	'''
 	The core function which mainpulates the population to find the best individual
 	'''
@@ -209,14 +209,19 @@ class Optimization
 		theWorst = @popul.idvs[@size-1].fitness
 		theBest = @popul.idvs[0].fitness
 		
-		if @last_best == theBest
+		diffBest = @last_best - theBest
+		# no changes
+		if diffBest == 0
 			@it_nr+=1
-		else
+		else 
 			@last_best = theBest
-			@it_nr = 1
+			# big change
+			if diffBest > 0.3
+				@it_nr = 1
+			else @it_nr+=1
 		
 		pop_diff = Math.abs(theBest - theWorst)/theBest
-		postMessage({diff:pop_diff, itNum:@it_nr})
+		postMessage({diff:pop_diff, itNum:@it_nr, diffBest:diffBest})
 		pop_diff < @min_diff and @it_nr >= @max_unchanged_best
 	
 	'''
@@ -224,7 +229,7 @@ class Optimization
 	'''
 	createTemp: () ->
 		temp = []
-		for i in [0..@lambda]
+		for i in [0..@lambda-1]
 			ind = Math.floor(Math.random()*@size)
 			tempInd = @popul.idvs[ind]
 			c = tempInd.createCopy(tempInd.value[..])
