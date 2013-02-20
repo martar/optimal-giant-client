@@ -247,8 +247,8 @@ module.exports = class HomePageView extends PageView
 				# console.log event.data
 			if (event.data.type == "stats")
 				@processStatistics event.data
-			#else
-			#	#console.log event.data
+			else
+				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage({gates:zip(@giantGates,@closedGates)})
 	

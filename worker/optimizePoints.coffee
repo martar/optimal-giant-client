@@ -82,11 +82,7 @@ class PointsSet extends evol.Individual
 		if angle <= 90
 			return 0.01
 		else
-			2*(angle/180)-1		
-
-	punishFuntion3 = (angle) =>
-		# angle between 0 and 180 degrees
-		(angle/180)^10		
+			2*(angle/180)-1			
 			
 	computePunishFactor :(positions) =>
 		i= 0
@@ -97,10 +93,10 @@ class PointsSet extends evol.Individual
 			a = positions[i]
 			b = positions[i+1]
 			c = positions[i+2]
-			abx = b[0] - a[0]
-			aby = b[1] - a[1]
-			cbx = b[0] - c[0]
-			cby = b[1] - c[1]
+			abx = b.x - a.x
+			aby = b.y - a.y
+			cbx = b.x - c.x
+			cby = b.y - c.y
 			angba = Math.atan2(aby, abx)
 			angbc = Math.atan2(cby, cbx)
 			rslt = angba - angbc
@@ -121,7 +117,7 @@ class PointsSet extends evol.Individual
 		for angle in angles
 			if angle > 180
 				angle = 360 - angle
-			punishFactors.push punishFuntion3(angle)
+			punishFactors.push punishFuntion(angle)
 			
 		punishFactors.push 1
 		{ punishFactors: punishFactors, numberOfEdgeChange: numberOfEdgeChange}
@@ -166,10 +162,10 @@ class PointsSet extends evol.Individual
 		t = 0
 		@min = 100000
 		
-		#@decreaseVelocityPunishment()
+		@decreaseVelocityPunishment()
 		#@decreaseVelocityPunishmentWithEgdeChangePunis()
 		#@mySumPunishment()
-		@mySumPunishmentWithEgdeChangePunish()
+		#@mySumPunishmentWithEgdeChangePunish()
 	
 	# number of gates besides START ans META
 	computeRedundantEdgeChangePunish = (numberOfEdgeChange, numberOfGates) =>
@@ -196,17 +192,17 @@ class PointsSet extends evol.Individual
 		@fitness = factor*(@skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5))
 		
 	decreaseVelocityPunishment: () ->
-		result = @computePunishFactor([[0,0]].concat @value)
+		result = @computePunishFactor([{x:0, y:0}].concat @value)
 		punishFactors = result.punishFactors
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.001)
+			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.1)
 		@fitness = @skier.result
 		
 	decreaseVelocityPunishmentWithEgdeChangePunis: () ->
-		result = @computePunishFactor([[0,0]].concat @value)
+		result = @computePunishFactor([{x:0, y:0}].concat @value)
 		punishFactors = result.punishFactors
 		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.001)
+			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.1)
 		@fitness = @skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5)
 		
 	createCopy: (changedPoints) ->
