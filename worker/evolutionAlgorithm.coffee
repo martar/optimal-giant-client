@@ -167,8 +167,8 @@ class Optimization
 			i+=1
 			postMessage {type: 'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value}
 			
-			
-			@stats.feed(@popul.idvs)
+			if ( i % 2 == 0)
+				@stats.feed(@popul.idvs)
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
