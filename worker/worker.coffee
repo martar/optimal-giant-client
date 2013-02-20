@@ -32,7 +32,7 @@ self.onmessage = (ev) ->
 	t0 = 0
 	endPoint = [50,50]
 
-	steepPositions = getCurveCoordinates(steep, endPoint, skier, 2400)
+	steepPositions = getCurveCoordinates(steep, endPoint, skier, 800)
 	skier2 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
 	kappa = 0.000001
 	t0 = 0

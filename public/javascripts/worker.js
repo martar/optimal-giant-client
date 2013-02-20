@@ -50,7 +50,7 @@
     steep = 0.001;
     t0 = 0;
     endPoint = [50, 50];
-    steepPositions = getCurveCoordinates(steep, endPoint, skier, 2400);
+    steepPositions = getCurveCoordinates(steep, endPoint, skier, 800);
     skier2 = new Skier(this.mi = 0.00, this.m = 60, this.C = 0.0, this.A = 0.2, this.solver = new OptimalGiant.Solver, this.x0 = startPoint, this.v0 = vstart);
     kappa = 0.000001;
     t0 = 0;
