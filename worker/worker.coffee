@@ -25,14 +25,14 @@ vectorDistance = (vector) ->
 
 self.onmessage = (ev) ->
 	start = Date.now()
-	vstart = [1,10]
+	vstart = [0.1,0.5]
 	startPoint = [0,0]
 	skier = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
 	steep = 0.001
 	t0 = 0
 	endPoint = [50,50]
 
-	steepPositions = getCurveCoordinates(steep, endPoint, skier, 800)
+	steepPositions = getCurveCoordinates(steep, endPoint, skier, 100)
 	skier2 = new Skier(@mi=0.00, @m=60, @C=0.0, @A=0.2, @solver=new OptimalGiant.Solver, @x0=startPoint, @v0=vstart)
 	kappa = 0.000001
 	t0 = 0
@@ -68,5 +68,5 @@ self.onmessage = (ev) ->
 	skiers.push skier2
 	skiers.push skier3
 	
-	lol = ({time: skier.result, positions: skier.getPositions(), color: skier.color} for skier in skiers)
+	lol = ({steeps: steepPositions.length, time: skier.result, positions: skier.getPositions(), color: skier.color} for skier in skiers)
 	postMessage {skiers: lol}
