@@ -223,8 +223,6 @@ class PointsSet extends evol.Individual
 	tau, tau_prim - parameters of evolutionary algorithm
 	'''
 	mutate: (gaussAll, tau, tau_prim) ->
-		#postMessage({c:"mutate"})
-		#indCount = Math.floor(Math.random()*(@value.length-1))
 		
 		# deep copy
 		newValue = (i.createCopy() for i in @value)
@@ -232,31 +230,32 @@ class PointsSet extends evol.Individual
 		for point in newValue
 			gauss = Math.nrand()
 			
-			# mutate sigma
-			point.dev = point.dev * Math.exp(tau_prim*gaussAll + tau*gauss)
-			
-			gauss = Math.nrand()			
-			diff = point.dev*gauss
-			old_value = point.x
-			point.x += diff
-			c = point.correct()
-			#postMessage({p:point.x,old:old_value,c:c,g:point.gate_x,diff:diff})
-			
-			# if the new value is not correct find another
-			while not point.correct()
+			if not (point instanceof Gate)
+				# mutate sigma
+				point.dev = point.dev * Math.exp(tau_prim*gaussAll + tau*gauss)
+				
 				gauss = Math.nrand()			
 				diff = point.dev*gauss
-				point.x = old_value + diff
-			
+				old_value = point.x
+				point.x += diff
+				#c = point.correct()
+				#postMessage({p:point.x,old:old_value,c:c,g:point.gate_x,diff:diff})
+				
+				# if the new value is not correct find another
+				while not point.correct()
+					gauss = Math.nrand()			
+					diff = point.dev*gauss
+					point.x = old_value + diff
+
 		#postMessage({inds:inds})
 		@createCopy(newValue)
 		
 	cross: (b) ->
-		# TODO cross the sigma??
 		crossed_points = []
 		for i in [0..@value.length-1]
 			copy = @value[i].createCopy()
 			copy.x = (@value[i].x + b.value[i].x)/2
+			copy.dev = (@value[i].dev + b.value[i].dev)/2
 			crossed_points.push copy
 		@createCopy(crossed_points)
 
