@@ -13,7 +13,58 @@ dataGen = () ->
 			y: 11
 		})
 	data
-	
+
+general_chart = (avg, best, worst) ->
+	general = new Highcharts.Chart({
+		chart: {
+			renderTo: 'general_stats_container',
+			type: 'spline',
+			marginRight: 10
+
+		},
+		title: {
+			text: 'Overall skier data'
+		},
+		xAxis: {
+			type: 'datetime',
+			tickPixelInterval: 150
+		},
+		yAxis: {
+			title: {
+				text: 'Value'
+			},
+			plotLines: [{
+				value: 0,
+				width: 1,
+				color: '#808080'
+			},
+			{
+				value: 0,
+				width: 1,
+				color: 'red'
+			},
+			{
+				value: 0,
+				width: 1,
+				color: 'yellow'
+			}]
+
+		},
+
+		legend: {
+			enabled: true
+		},
+
+		exporting: {
+			enabled: false
+		},
+		
+		series: [
+			{name: 'AverageFitness',data: avg},
+			{name:'Best Fitness', data: best},
+			{name:'Worst Fitness', data: worst},
+			]
+	})
 fu = () ->
 	chart = new Highcharts.Chart({
 		chart: {
@@ -166,16 +217,20 @@ module.exports = class HomePageView extends PageView
 		@context.strokeStyle = 'black'
 		
 	renderResults: (data) -> 
-		for skier in data.skiers
-			skier.color ?= "black"
-			@$('#results').append($("<li></li>").html(skier.color + ' ' + skier.time))
+		general_chart(@avgFitness, @bestFitness, @worstFitness)
+		#for skier in data.skiers
+		#	skier.color ?= "black"
+		#	@$('#results').append($("<li></li>").html(skier.color + ' ' + skier.time))
 	
 	processStatistics: (data) =>
 		if (data.plugin == "AverageFitness")
+			@avgFitness.push(data.value)
 			@chart.series[0].addPoint([(new Date()).getTime(), data.value], false, true)
 		else if (data.plugin == "BestFitness")
+			@bestFitness.push(data.value)
 			@chart.series[1].addPoint([(new Date()).getTime(), data.value], false, true)
 		else if (data.plugin == "WorstFitness")
+			@worstFitness.push(data.value)
 			@chart.series[2].addPoint([(new Date()).getTime(), data.value], true, true)
 	
 	work: () =>
@@ -185,15 +240,15 @@ module.exports = class HomePageView extends PageView
 			if (event.data.type == 'final')
 				@draw event.data
 				# console.log event.data
-				# @renderResults event.data
-			if(event.data.type == 'intermediate' and i % 10 == 0)
+				@renderResults event.data
+			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
 				# console.log event.data
 			if (event.data.type == "stats")
 				@processStatistics event.data
-			#else
-			#	#console.log event.data
+			else
+				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage({gates:zip(@giantGates,@closedGates)})
 	
