@@ -9,8 +9,10 @@ self.onmessage = (ev) ->
 	populationCount = 30
 
 	vLen = 0.1 # 0.0000001
-	gates = (new Gate(gate,i%2) for gate,i in ev.data.gates)
-	pop = new PointTurns(3,populationCount,vLen,gates)
+	left = [0,1,0,0,1,0,1,0]
+	#left = [0,1,0,1,0,1,0,1]
+	gates = (new Gate(gate,left[i]) for gate,i in ev.data.gates)
+	pop = new PointTurns(4,populationCount,vLen,gates)
 	crossNr = 10
 
 	mutateProb = 1

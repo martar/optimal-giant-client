@@ -141,11 +141,13 @@ module.exports = class HomePageView extends PageView
 		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[7,25], [0, 30]]
 		
 		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62]]
-		@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
+		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
+		@giantGates = [[3,10],[-5,30],[4,50],[-4,65],[-16,80],[-6,100],[-13,120],[-10,135]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
 		#@closedGates = [0,0,1,1,0,0]
 		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
-		@closedGates = [0,0,1,1,0,0]
+		#@closedGates = [0,0,1,1,0,0]
+		@closedGates = [0,0,0,0,0,0,0,0]
 		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62], [5,75], [6,77], [3,80], [0,93]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
 		#@closedGates = [0,0,1,1,1,0,0,0]
@@ -154,7 +156,7 @@ module.exports = class HomePageView extends PageView
 		
 		@work()
 
-	transX = (coord) -> Math.round (coord*10+100)
+	transX = (coord) -> Math.round (coord*10+175)
 	transY = (coord) -> Math.round (coord*10+100)	
 	
 	draw: (data) ->
