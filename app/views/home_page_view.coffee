@@ -122,10 +122,29 @@ fu = () ->
 module.exports = class HomePageView extends PageView
 	template: template
 	className: 'home-page'
-	afterRender: ->
+	
+	# i supose it is not a proper way of passing model throug controller to view.. but it is a only way it workeds
+	constructor : (@problem) ->
 		super
+		
+	onSuccess: (result) =>
+		console.log "ON SYNKKK"
+		#@giantGates =  [[3,10],[-5,30],[4,50],[-4,65],[-16,80],[-6,100],[-13,120],[-10,135]]
+		#@closedGates =  [0,0,0,0,0,0,0,0]
+		@giantGates = @problem.attributes.value.giantGates
+		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
+		@closedGates = @problem.attributes.value.closedGates
+		@work()
+		
+	afterRender: =>
+		super
+		console.dir @problem
 		@toggle = true
 		@canvas = @$('#slope').get(0)
+		@getProblemButton = @$('#get-problem-button')
+		@getProblemButton.click () =>
+			@problem.load @onSuccess
+
 		@context = @canvas.getContext('2d')
 		@worker = new Worker 'javascripts/turnWorker.js'
 		@avgFitness = [[]]
@@ -137,29 +156,12 @@ module.exports = class HomePageView extends PageView
             global: { useUTC: false}
 		})
 		
-		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[5,25], [2,30],[7,35], [3,44]]
-		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[7,25], [0, 30]]
 		
-		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62]]
-		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
-		@giantGates = [[3,10],[-5,30],[4,50],[-4,65],[-16,80],[-6,100],[-13,120],[-10,135]]
-		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
-		#@closedGates = [0,0,1,1,0,0]
-		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
-		#@closedGates = [0,0,1,1,0,0]
-		@closedGates = [0,0,0,0,0,0,0,0]
-		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62], [5,75], [6,77], [3,80], [0,93]]
-		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
-		#@closedGates = [0,0,1,1,1,0,0,0]
-		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
-		
-		
-		@work()
 
 	transX = (coord) -> Math.round (coord*10+175)
 	transY = (coord) -> Math.round (coord*10+100)	
 	
-	draw: (data) ->
+	draw: (data) =>
 		for skier in data.skiers
 			skier.color ?= "black"
 			@context.strokeStyle = skier.color
@@ -171,7 +173,7 @@ module.exports = class HomePageView extends PageView
 				@context.lineTo x, y
 			@context.stroke()
   
-	drawIntermediate: (data) ->
+	drawIntermediate: (data) =>
 		@context.clearRect(0, 0, @canvas.width, @canvas.height)
 		@drawGates()
 		@context.beginPath()
@@ -182,7 +184,7 @@ module.exports = class HomePageView extends PageView
 			@context.lineTo x, y
 		@context.stroke()
 			
-	drawGates: () ->
+	drawGates: () =>
 		gates = zip(@giantGates,@closedGates)
 		flagWidth = 0.75 # wigth of the flag between pols in meters
 		gateWidth = 6 # between 4 and 8 m
@@ -218,7 +220,7 @@ module.exports = class HomePageView extends PageView
 		@context.lineWidth = 1
 		@context.strokeStyle = 'black'
 		
-	renderResults: (data) -> 
+	renderResults: (data) => 
 		general_chart(@avgFitness, @bestFitness, @worstFitness)
 		#for skier in data.skiers
 		#	skier.color ?= "black"
@@ -243,6 +245,9 @@ module.exports = class HomePageView extends PageView
 				@draw event.data
 				# console.log event.data
 				@renderResults event.data
+				console.dir event.data
+				@problem.postResult event.data, () ->
+					alert("Thanks - we got result of your computation. All world skiers will love you! Do it again please to solve this first wolr problem with us!")
 			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
