@@ -127,7 +127,7 @@ module.exports = class HomePageView extends PageView
 		@toggle = true
 		@canvas = @$('#slope').get(0)
 		@context = @canvas.getContext('2d')
-		@worker = new Worker 'javascripts/turnWorker.js'
+		@worker = new Worker 'javascripts/machineLearningWorker.js'
 		@avgFitness = [[]]
 		@bestFitness = [[]]
 		@worstFitness = [[]]
@@ -141,11 +141,13 @@ module.exports = class HomePageView extends PageView
 		#@giantGates = [[5,5],[0,10],[5,15], [4,20],[7,25], [0, 30]]
 		
 		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62]]
-		@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
+		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[11,57], [0,70]]
+		@giantGates = [[10,10]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
 		#@closedGates = [0,0,1,1,0,0]
+		@closedGates = [0]
 		#@closedGates = [0,0,1,1,1,0,0,0,0,0]
-		@closedGates = [0,0,1,1,0,0]
+		#@closedGates = [0,0,1,1,0,0]
 		#@giantGates = [[5,13],[0,26],[5,39], [4,44],[5,49], [0,62], [5,75], [6,77], [3,80], [0,93]]
 		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
 		#@closedGates = [0,0,1,1,1,0,0,0]
@@ -250,10 +252,15 @@ module.exports = class HomePageView extends PageView
 			else
 				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
-		@worker.postMessage({gates:zip(@giantGates,@closedGates)})
+		zipped = zip(@giantGates,@closedGates)
+		#console.log(zipped)
+		@worker.postMessage({gates:zipped})
 	
 zip = () ->
   lengthArray = (arr.length for arr in arguments)
   length = Math.min(lengthArray...)
-  for i in [0...length]
-    arr[i] for arr in arguments	
+  console.log lengthArray
+  console.log length
+  console.log arguments
+  for i in [0..length-1]
+    arr[i] for arr in arguments

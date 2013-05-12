@@ -70,8 +70,8 @@ class Skier
 	constructor: (@mi=0.05, @m=60, @C=0.6, @A=0.2, @solver=new Solver(), @x0=[0,0], @v0=[0,19]) ->
 		this.roh = 1.32 # air density
 		@k2 = 0.5 * @C * this.roh * @A
-		@velocities = [v0]
-		@positions = [x0]
+		@velocities = [@v0]
+		@positions = [@x0]
 		@result = 0
 		@min = 10000
 	
@@ -99,7 +99,7 @@ class Skier
 	###			
 	moveStraightToPoint : ( punishFactor, endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
-		kappa = 0 #0.0000001
+		kappa = 0.00001
 		v_len = punishFactor*Utils.vectorLength(@velocities[0])
 		while !reachedDestination
 			v =Utils.findCoords( endPoint, @positions[0], v_len)
