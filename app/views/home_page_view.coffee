@@ -243,11 +243,11 @@ module.exports = class HomePageView extends PageView
 				@draw event.data
 				# console.log event.data
 				@renderResults event.data
-			if(event.data.type == 'intermediate')
+			else if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
 				# console.log event.data
-			if (event.data.type == "stats")
+			else if (event.data.type == "stats")
 				@processStatistics event.data
 			else
 				console.log event.data
@@ -259,8 +259,5 @@ module.exports = class HomePageView extends PageView
 zip = () ->
   lengthArray = (arr.length for arr in arguments)
   length = Math.min(lengthArray...)
-  console.log lengthArray
-  console.log length
-  console.log arguments
   for i in [0..length-1]
     arr[i] for arr in arguments

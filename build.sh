@@ -6,4 +6,5 @@ coffee --compile --output public/javascripts/ worker/gate.coffee
 cp worker/gauss.js public/javascripts/gauss.js
 cp worker/numeric.js public/javascripts/numeric.js
 cp worker/underscore.js public/javascripts/underscore.js
+cp worker/jshashtable-2.1.js public/javascripts/jshashtable.js
 brunch build

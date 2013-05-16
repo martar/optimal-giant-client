@@ -8,8 +8,8 @@ self.onmessage = (ev) ->
 	dx = 1
 	dy = 1
 	alfa = 1
-	gamma = 1
-	endPoint = [10,10]
+	gamma = 0.5
+	endPoint = ev.data.gates[ev.data.gates.length-1][0]
 	env = new Environment(dx,dy,gates)
 	ml = new Learning(env, alfa, gamma, endPoint)
 	ml.start()
