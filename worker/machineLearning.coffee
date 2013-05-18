@@ -98,19 +98,19 @@ class Learning
 		
 		no_punish_factor = 1
 		episode = 1
-		MAX_EPISODES = 1000
-		while episode < MAX_EPISODES
+		MAX_EPISODES = 100
+		while episode <= MAX_EPISODES
 			skier.reset()
 			gates_times = [0]
 	
 			#initial state
 			current_state = new State(skier.getVelocities()[0],@env.getNextGatesDistsAtStart(@gates_nr,skier.getPosition()))
 			
-			# until we reach the end
+			# until we reach last gate
 			while Utils.vectorDistance(skier.getPosition(),@endPoint) > 0.1
 				
 				possible_actions = @env.getPossibleActions(current_state)
-				[action, isGate] = @chooseAction(possible_actions)
+				[action, isGate] = @chooseAction(possible_actions,current_state)
 				
 				[x,y] = skier.getPosition()
 				[dx,dy] = action.getDests()
@@ -130,10 +130,10 @@ class Learning
 				
 				@updateQ(current_state, action, reward, new_state)
 				current_state = new_state
-			postMessage {type:"intermediate", best:skier.getPositions()}
+			#postMessage {type:"intermediate", best:skier.getPositions()}
 			episode += 1
-		for en in @Q.entries()
-			postMessage {state_x:en[0].gates_dists[0][0],state_y:en[0].gates_dists[0][1],actions:en[1].keys()[0].dest[0], val:en[1].values()[0]}
+		#for en in @Q.entries()
+		#	postMessage {state_x:en[0].gates_dists[0][0],state_y:en[0].gates_dists[0][1],actions:en[1].keys()[0].dest[0], val:en[1].values()[0]}
 		
 		pos = @findBest()
 		postMessage {type:"intermediate", best:pos}
@@ -146,6 +146,11 @@ class Learning
 		while Utils.vectorDistance(cur_pos,@endPoint) > 0.1
 			max = 0
 			action = null
+			if not @Q.containsKey(state)
+				st = []
+				st.push k if k.gates_dists[0][1] == z for k in @Q.keys()
+				postMessage {s:state, sa:st}
+			
 			for _,[act,val] of @Q.get(state).entries()
 				if val >= max
 					max = val
@@ -162,8 +167,40 @@ class Learning
 			
 		return pos
 		
-	chooseAction: (actions) ->
-		i = Math.floor(Math.random()*actions.length)
+	chooseAction: (actions,state) ->
+		#postMessage {s:state,a:actions}
+		sum = 0
+		probs = []
+		for action in actions
+			a = action[0]
+			action_val = 0
+			if @Q.containsKey(state)
+				if @Q.get(state).containsKey(a)
+					action_val = @Q.get(state).get(a)
+					#if action_val>1
+					#	postMessage {v:action_val}
+			# if there is no action yet or the value is < MIN_VAL
+			MIN_VAL = 0.2
+			if action_val < MIN_VAL
+				action_val = MIN_VAL
+			probs.push(action_val)
+			sum += action_val
+		
+		#i = Math.floor(Math.random()*actions.length)
+		random_val = Math.random()*sum
+		i = 0
+		p = probs[0]
+		while i+1 < actions.length
+			if random_val < p
+				#if sum/probs.length != 1
+				#	postMessage {probs:probs}
+				#	postMessage {r:random_val, i:i}
+				return [actions[i][0],actions[i][1]]
+			p += probs[i+1]
+			i += 1
+		#if sum/probs.length != 1
+		#	postMessage {probs:probs}
+		#	postMessage {r:random_val, i:i}
 		return [actions[i][0],actions[i][1]]
 		
 	updateQ: (state, action, reward, future_state) ->
