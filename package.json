@@ -19,12 +19,12 @@
     "url": ""
   },
   "engines": {
-    "node": "0.6.x",
-    "npm":  "1.1.x"
+    "node": "~0.8.14",
+    "npm": "~1.1"
   },
   "scripts": {
     "start": "brunch watch --server",
-	"postinstall": "brunch build --minify",
+	"postinstall": "brunch build --optimize"
     "test": "brunch test"
   },
   "dependencies": {
