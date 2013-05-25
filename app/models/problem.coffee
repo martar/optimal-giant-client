@@ -1,5 +1,5 @@
 Model = require 'models/base/model'
-SERVER_URL = 'http://localhost:8080/'
+SERVER_URL = 'http://giant-server.herokuapp.com:80/'
 
 module.exports = class Problem extends Model
 	defaults:
