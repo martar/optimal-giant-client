@@ -1002,7 +1002,7 @@ window.require.define({"views/home_page_view": function(exports, require, module
         marginRight: 10
       },
       title: {
-        text: 'Overall skier data'
+        text: 'Overall fitness of the population'
       },
       xAxis: {
         type: 'datetime',
@@ -1058,7 +1058,7 @@ window.require.define({"views/home_page_view": function(exports, require, module
         marginRight: 10
       },
       title: {
-        text: 'Live skier data'
+        text: 'Fitness of the population'
       },
       xAxis: {
         type: 'datetime',
@@ -1150,8 +1150,12 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.toggle = true;
       this.canvas = this.$('#slope').get(0);
       this.getProblemButton = this.$('#get-problem-button');
+      this.dancers = this.$('#dancers');
+      this.success = this.$('#success');
+      this.computationContainer = this.$('#computation');
       this.getProblemButton.click(function() {
-        return _this.problem.load(_this.onSuccess);
+        _this.problem.load(_this.onSuccess);
+        return _this.success.hide();
       });
       this.context = this.canvas.getContext('2d');
       this.worker = new Worker('javascripts/turnWorker.js');
@@ -1274,6 +1278,9 @@ window.require.define({"views/home_page_view": function(exports, require, module
       var i,
         _this = this;
       i = 0;
+      this.getProblemButton.hide();
+      this.dancers.show();
+      this.computationContainer.show();
       this.worker.onmessage = function(event) {
         i += 1;
         if (event.data.type === 'final') {
@@ -1281,7 +1288,9 @@ window.require.define({"views/home_page_view": function(exports, require, module
           _this.renderResults(event.data);
           console.dir(event.data);
           _this.problem.postResult(event.data, function() {
-            return alert("Thanks - we got result of your computation. All world skiers will love you! Do it again please to solve this first wolr problem with us!");
+            _this.dancers.fadeOut();
+            _this.getProblemButton.show();
+            return _this.success.show();
           });
         }
         if (event.data.type === 'intermediate') {
@@ -1431,34 +1440,10 @@ window.require.define({"views/login_view": function(exports, require, module) {
 window.require.define({"views/templates/header": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var foundHelper, self=this;
 
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\r\n  <a class=\"header-link\" href=\"";
-    foundHelper = helpers.href;
-    stack1 = foundHelper || depth0.href;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "href", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.title;
-    stack1 = foundHelper || depth0.title;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "title", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\r\n";
-    return buffer;}
 
-    foundHelper = helpers.items;
-    stack1 = foundHelper || depth0.items;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { return stack1; }
-    else { return ''; }});
+    return "<div id=\"fb-root\"></div>\r\n<script>(function(d, s, id) {\r\n  var js, fjs = d.getElementsByTagName(s)[0];\r\n  if (d.getElementById(id)) return;\r\n  js = d.createElement(s); js.id = id;\r\n  js.src = \"//connect.facebook.net/en_US/all.js#xfbml=1&appId=348707178584637\";\r\n  fjs.parentNode.insertBefore(js, fjs);\r\n}(document, 'script', 'facebook-jssdk'));</script>";});
 }});
 
 window.require.define({"views/templates/home": function(exports, require, module) {
@@ -1467,7 +1452,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<div class=\"container\">\r\n	<div class=\"row\">\r\n		<button id=\"get-problem-button\"> Get problem instance </button>\r\n	</div>\r\n	<div class=\"row\" >\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n\r\n	</div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
+    return "﻿<div class=\"container\">\r\n	<div class=\"row\">\r\n	  \r\n		<center>\r\n			<h2>\r\n			We find the fastest track, the alpine skier should take in order to win!\r\n			</h2>\r\n			<h4>\r\n			<img class=\"pull-left\" style=\"margin-top: -5px\" src=\"img/test/new.gif\">\r\n				Created as a master thesis at AGH University of Science and Technology.</br>March 2012 - May 2013.\r\n				<img style=\"margin: 10px;\" src=\"img/test/notepad.gif\">\r\n			</h4>\r\n			<div>	\r\n			<button id=\"get-problem-button\" class=\"btn btn-primary\"> Show me !! </button>\r\n			<div id=\"dancers\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n			</div>\r\n			</div>\r\n			<div class=\"fb-like\" data-href=\"http://giant-client.herokuapp.com/\" data-width=\"450\" data-show-faces=\"true\"></div>\r\n			<div id=\"success\" class=\"alert alert-success\" style=\"display: none;\" >\r\n				<a class=\"close\">×</a>\r\n				<strong>Success</strong>Thanks - we got result of your computation. All world skiers will love you! Note that every time you or your frineds click the button and start the computations, this first world problem is closer to be solved! So share!\r\n		\r\n			  </div>\r\n		</center>\r\n	</div>\r\n	<div class=\"row\" id=\"computation\" >\r\n		<h4>\r\n			What you see here is a giant slalom and our algorithm that finds the fastest tract for the skier. The problem instance was requested from our server. All the computations are run in your browser and will be send to our server once it is done. \r\n		</h4>\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n\r\n	</div>\r\n				<center>\r\n        <img src=\"img/test/yahooweek.gif\">\r\n        <img src=\"img/test/community.gif\">\r\n        <img src=\"img/test/wabwalk.gif\">\r\n        <img src=\"img/test/webtrips.gif\">\r\n      </center>\r\n\r\n	  <div>\r\n	  </br>\r\n	  </br>\r\n	  <p class=\"pull-right\" style=\"margin-top: -14px\"><img src=\"img/test/hacker.gif\">&nbsp; Built by Anna Skiba, Marta Ryłko & dr. inż. Roman Dębski <a href=\"https://github.com/martar/optimal-gigant/wiki\">More details behind this project..</a></p>\r\n		\r\n	  </div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

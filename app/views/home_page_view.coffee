@@ -23,7 +23,7 @@ general_chart = (avg, best, worst) ->
 
 		},
 		title: {
-			text: 'Overall skier data'
+			text: 'Overall fitness of the population'
 		},
 		xAxis: {
 			type: 'datetime',
@@ -74,7 +74,7 @@ fu = () ->
 
 		},
 		title: {
-			text: 'Live skier data'
+			text: 'Fitness of the population'
 		},
 		xAxis: {
 			type: 'datetime',
@@ -142,9 +142,12 @@ module.exports = class HomePageView extends PageView
 		@toggle = true
 		@canvas = @$('#slope').get(0)
 		@getProblemButton = @$('#get-problem-button')
+		@dancers = @$('#dancers')
+		@success =  @$('#success')
+		@computationContainer = @$('#computation')
 		@getProblemButton.click () =>
 			@problem.load @onSuccess
-
+			@success.hide()
 		@context = @canvas.getContext('2d')
 		@worker = new Worker 'javascripts/turnWorker.js'
 		@avgFitness = [[]]
@@ -239,6 +242,9 @@ module.exports = class HomePageView extends PageView
 	
 	work: () =>
 		i=0
+		@getProblemButton.hide()
+		@dancers.show()
+		@computationContainer.show()
 		@worker.onmessage = (event) =>
 			i += 1
 			if (event.data.type == 'final')
@@ -246,8 +252,10 @@ module.exports = class HomePageView extends PageView
 				# console.log event.data
 				@renderResults event.data
 				console.dir event.data
-				@problem.postResult event.data, () ->
-					alert("Thanks - we got result of your computation. All world skiers will love you! Do it again please to solve this first wolr problem with us!")
+				@problem.postResult event.data, () =>
+					@dancers.fadeOut()
+					@getProblemButton.show()
+					@success.show()			
 			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
