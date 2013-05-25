@@ -37,6 +37,8 @@ class Utils
 			factor = -1
 		vx = factor * length/(Math.sqrt(1+vProp*vProp))
 		vy = factor * vProp*length/(Math.sqrt(1+vProp*vProp))
+		if not vy
+			vy = length
 		[vx, vy]
 	
 	###
