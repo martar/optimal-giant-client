@@ -6,6 +6,7 @@ coffee --compile --output public/javascripts/ worker/evolutionAlgorithm.coffee
 coffee --compile --output public/javascripts/ worker/localOptAlgorithm.coffee
 coffee --compile --output public/javascripts/ worker/statistics.coffee
 coffee --compile --output public/javascripts/ worker/gate.coffee
+coffee --compile --output public/javascripts/ worker/punishments.coffee
 cp worker/gauss.js public/javascripts/gauss.js
 cp worker/numeric.js public/javascripts/numeric.js
 cp worker/underscore.js public/javascripts/underscore.js

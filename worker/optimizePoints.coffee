@@ -3,6 +3,7 @@ importScripts './solver.js'
 importScripts './evolutionAlgorithm.js'
 importScripts './gauss.js'
 importScripts './gate.js'
+importScripts './punishments.js'
 
 evol = {}
 evol.Individual = Individual
@@ -70,91 +71,6 @@ class PointsSet extends evol.Individual
 			@skier.velocities = [vel[0],vel[1]]
 		@computeFitness()
 	
-	punishFuntion = (angle) =>
-		# angle between 0 and 180 degrees
-		if angle <= 90
-			return 0.01
-		else
-			1-Math.pow((angle/180.0)-1.5,6)
-			
-	punishFuntion2 = (angle) =>
-		# angle between 0 and 180 degrees
-		if angle <= 90
-			return 0.01
-		else
-			2*(angle/180)-1			
-			
-	computePunishFactor :(positions) =>
-		i= 0
-		punishFactors = []
-		angles = []
-		punishFactors.push 1
-		while i < positions.length - 2
-			a = positions[i]
-			b = positions[i+1]
-			c = positions[i+2]
-			abx = b.x - a.x
-			aby = b.y - a.y
-			cbx = b.x - c.x
-			cby = b.y - c.y
-			angba = Math.atan2(aby, abx)
-			angbc = Math.atan2(cby, cbx)
-			rslt = angba - angbc
-			angle = (rslt * 180) / 3.141592
-			angles.push angle
-			i += 1
-		i=0
-		# we want to know how many times the skier had to change the edges,
-		# we will use it tu munish him more!
-		numberOfEdgeChange = 0
-		while (i < angles.length-1)
-			# if the signs of the neighbour steps are diffrent, punish the next step by some factor (because it takes more time to change the edges that to simply sline in the same turn
-			
-			if ((180-angles[i+1])*(180-angles[i])<0)
-				numberOfEdgeChange += 1
-			i+=1
-				
-		for angle in angles
-			if angle > 180
-				angle = 360 - angle
-			punishFactors.push punishFuntion(angle)
-			
-		punishFactors.push 1
-		{ punishFactors: punishFactors, numberOfEdgeChange: numberOfEdgeChange}
-	
-	computePunishment : (positions) =>
-		i = 0
-		# compute the second derivative
-		diff = []
-		while (i < positions.length-2)
-			[x3,y3] = positions[i+2]
-			[x2,y2] = positions[i+1]
-			[x1,y1] = positions[i]
-			denominator = (y3-y2)*(y2-y1)
-			numerator = x1 + x3 - 2*x2
-			diff.push numerator/denominator
-			i+=1
-		# apply the punishment
-		# console.log diff
-		i = 0
-		punish = []
-		# we want to know how many times the skier had to change the edges,
-		# we will use it tu munish him more!
-		numberOfEdgeChange = 0
-		while (i < diff.length-1)
-			# if the signs of the neighbour steps are diffrent, punish the next step by some factor (because it takes more time to change the edges that to simply sline in the same turn
-			if (diff[i+1]*diff[i]<0)
-				numberOfEdgeChange += 1
-			i+=1
-		# it's important to punish more the bigger values of derivatives than sum of smaller values of derivatives,
-		# so we take the 
-		diff = (Math.abs(item)* item * item for item in diff)
-		# console.log "ABS AND x^3"
-		# console.log diff
-		sum = diff.reduce (t, s) -> t + s
-		{ sum: sum, numberOfEdgeChange: numberOfEdgeChange}
-
-	
 	computeFitness: () ->
 		if @fitness
 			return @fitness
@@ -162,48 +78,10 @@ class PointsSet extends evol.Individual
 		t = 0
 		@min = 100000
 		
-		@decreaseVelocityPunishment()
+		@fitness = Punishment.segmentVelocityCorrection(@skier,@value)
 		#@decreaseVelocityPunishmentWithEgdeChangePunis()
 		#@mySumPunishment()
 		#@mySumPunishmentWithEgdeChangePunish()
-	
-	# number of gates besides START ans META
-	computeRedundantEdgeChangePunish = (numberOfEdgeChange, numberOfGates) =>
-		numberOfRightChanges = numberOfGates - 1
-		numberOfRedundanChanges = numberOfEdgeChange - numberOfRightChanges
-		if numberOfRedundanChanges < 0
-			throw "Number of redundant gates wrong!"
-		redundantChangePunish = 2 # seconds
-		numberOfRedundanChanges * redundantChangePunish
-	
-	mySumPunishment: () ->
-		for nextPos, index in @value
-			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
-		result = @computePunishment(@skier.positions)
-		factor = result.sum
-		@fitness = factor*@skier.result
-	
-	mySumPunishmentWithEgdeChangePunish: () ->
-		for nextPos, index in @value
-			@skier.moveStraightToPoint(1, [nextPos.x,nextPos.y], 0.001)
-		result = @computePunishment(@skier.positions)
-		factor = result.sum
-		# FIXME fixed 5 
-		@fitness = factor*(@skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5))
-		
-	decreaseVelocityPunishment: () ->
-		result = @computePunishFactor([{x:0, y:0}].concat @value)
-		punishFactors = result.punishFactors
-		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.1)
-		@fitness = @skier.result
-		
-	decreaseVelocityPunishmentWithEgdeChangePunis: () ->
-		result = @computePunishFactor([{x:0, y:0}].concat @value)
-		punishFactors = result.punishFactors
-		for nextPos, index in @value
-			@skier.moveStraightToPoint(punishFactors[index], [nextPos.x,nextPos.y], 0.1)
-		@fitness = @skier.result + computeRedundantEdgeChangePunish(result.numberOfEdgeChange, 5)
 		
 	createCopy: (changedPoints) ->
 		skierPos = @skier.getPositions()
