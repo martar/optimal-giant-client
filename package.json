@@ -23,9 +23,7 @@
     "npm":  "1.1.x"
   },
   "scripts": {
-    "start": "brunch watch --server",
-	"postinstall": "brunch build --minify",
-    "test": "brunch test"
+    "start": "brunch watch --server"
   },
   "dependencies": {
 	"statik": ">= 1.1.0", 
