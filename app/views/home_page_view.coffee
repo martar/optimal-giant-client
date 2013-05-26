@@ -144,6 +144,11 @@ module.exports = class HomePageView extends PageView
 		@getProblemButton = @$('#get-problem-button')
 		@dancers = @$('#dancers')
 		@success =  @$('#success')
+		@nsolved = @$('#nsolved')
+		@musicoff = @$('#musicoff')
+		@musicoff.click () =>
+			@$('#game').remove()
+		@numberOfSolved = 0
 		@computationContainer = @$('#computation')
 		@getProblemButton.click () =>
 			@problem.load @onSuccess
@@ -252,10 +257,13 @@ module.exports = class HomePageView extends PageView
 				# console.log event.data
 				@renderResults event.data
 				console.dir event.data
+				@dancers.fadeOut()
+				@success.show()	
 				@problem.postResult event.data, () =>
-					@dancers.fadeOut()
-					@getProblemButton.show()
-					@success.show()			
+					@problem.load @onSuccess
+					@success.hide()		
+					@numberOfSolved += 1
+					@nsolved.html(@numberOfSolved)
 			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
