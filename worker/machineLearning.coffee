@@ -16,14 +16,13 @@ class State
 		return @roundVelocity(@vx) + " " + @roundVelocity(@vy) + " " + @gates_dists[0][0] + " " + @gates_dists[0][1]
 		
 	roundVelocity: (coord) ->
-		return Math.floor(coord/10)
+		#return Math.floor(coord/10)
+		return 0
 	
 class Environment
 	constructor: (@dx,@dy,@gates,@startPoint=[0,0]) ->
-		@sasa = 0
 	
-	getPossibleActions: (state) ->
-	
+	getPossibleActions: (state) ->	
 		# the gate is reachable in this step - choose an action heading straight to gate
 		if Math.abs(state.gates_dists[0][1] - @dy) < 0.01
 			return [[new Action(state.gates_dists[0]),true]]
@@ -88,18 +87,19 @@ class Action
 		return @dest[0] + " " + @dest[1]
 		
 class Learning
-	constructor: (@env, @alfa, @gamma, @endPoint, @startPoint = [0,0], @gates_nr = 1) ->
+	constructor: (@env, @alfa, @gamma, @endPoint, @MAX_EPISODES, @startPoint = [0,0], @gates_nr = 1, @start_v = [0,0.01]) ->
 		@Q = new Hashtable()
 		
 	start: () ->
-	
 		# create and set up the skier
-		skier = new solver.Skier(mi=0.05, m=60, C=0.6, A=0.2,  null, x0=[0,0], v0=[0,1])
+		skier = new solver.Skier(mi=0, m=60, C=0, A=0,  null, x0=[0,0], v0=@start_v)
 		
 		no_punish_factor = 1
+		
+		all_gates = []		
 		episode = 1
-		MAX_EPISODES = 100
-		while episode <= MAX_EPISODES
+		skiers = []
+		while episode <= @MAX_EPISODES
 			skier.reset()
 			gates_times = [0]
 	
@@ -125,33 +125,34 @@ class Learning
 					time2 = gates_times[gates_times.length-1]
 					time1 = gates_times[gates_times.length-1-@gates_nr]
 					time = time2-time1
-				
+											
 				reward = @getReward(time,isGate)
 				
 				@updateQ(current_state, action, reward, new_state)
 				current_state = new_state
 			#postMessage {type:"intermediate", best:skier.getPositions()}
 			episode += 1
-		#for en in @Q.entries()
-		#	postMessage {state_x:en[0].gates_dists[0][0],state_y:en[0].gates_dists[0][1],actions:en[1].keys()[0].dest[0], val:en[1].values()[0]}
-		
+			all_gates.push gates_times[1]
+
+		@printQ()
 		pos = @findBest()
 		postMessage {type:"intermediate", best:pos}
-	
+		
+		@printMinRide()
+		return skiers
+		
 	findBest: () ->
 		cur_pos = [0,0]
 		pos = [cur_pos]
-		state = new State([0,1],@env.getNextGatesDistsAtStart(@gates_nr,cur_pos))
+		state = new State(@start_v,@env.getNextGatesDistsAtStart(@gates_nr,cur_pos))
+		skier = new solver.Skier(mi=0, m=60, C=0, A=0,  null, x0=[0,0], v0=@start_v)
 		
 		while Utils.vectorDistance(cur_pos,@endPoint) > 0.1
 			max = 0
 			action = null
-			if not @Q.containsKey(state)
-				st = []
-				st.push k if k.gates_dists[0][1] == z for k in @Q.keys()
-				postMessage {s:state, sa:st}
 			
 			for _,[act,val] of @Q.get(state).entries()
+				#postMessage {a:act.getDests()[0], v:val}
 				if val >= max
 					max = val
 					action = act
@@ -160,15 +161,25 @@ class Learning
 				return pos
 			else
 				postMessage {action_x:action.dest[0], v:max}
+		
+			[x,y] = cur_pos
+			[dx,dy] = action.getDests()
+			
+			skier.moveStraightToPoint(1,[x+dx,y+dy])
+			
 			cur_pos = [cur_pos[0] + action.dest[0], cur_pos[1] + action.dest[1]]
 			pos.push(cur_pos)
 			[gsx,gsy] = state.gates_dists[0]
 			state = new State([0,0],[[gsx-action.dest[0],gsy-action.dest[1]]])
-			
+		
+		postMessage {res:skier.result}
 		return pos
 		
-	chooseAction: (actions,state) ->
-		#postMessage {s:state,a:actions}
+	chooseAction: (actions,state,random=false) ->
+		if random
+			i = Math.floor(Math.random()*actions.length)
+			return [actions[i][0],actions[i][1]]
+
 		sum = 0
 		probs = []
 		for action in actions
@@ -177,30 +188,21 @@ class Learning
 			if @Q.containsKey(state)
 				if @Q.get(state).containsKey(a)
 					action_val = @Q.get(state).get(a)
-					#if action_val>1
-					#	postMessage {v:action_val}
 			# if there is no action yet or the value is < MIN_VAL
-			MIN_VAL = 0.2
+			MIN_VAL = 0.1
 			if action_val < MIN_VAL
 				action_val = MIN_VAL
 			probs.push(action_val)
 			sum += action_val
 		
-		#i = Math.floor(Math.random()*actions.length)
 		random_val = Math.random()*sum
 		i = 0
 		p = probs[0]
 		while i+1 < actions.length
 			if random_val < p
-				#if sum/probs.length != 1
-				#	postMessage {probs:probs}
-				#	postMessage {r:random_val, i:i}
 				return [actions[i][0],actions[i][1]]
 			p += probs[i+1]
 			i += 1
-		#if sum/probs.length != 1
-		#	postMessage {probs:probs}
-		#	postMessage {r:random_val, i:i}
 		return [actions[i][0],actions[i][1]]
 		
 	updateQ: (state, action, reward, future_state) ->
@@ -221,7 +223,7 @@ class Learning
 		upper_bound_time = 10
 		if not isGate
 			return 0
-		return upper_bound_time-t
+		return upper_bound_time - t
 		
 	_getMax: (state) ->
 		max = 0
@@ -230,5 +232,23 @@ class Learning
 				if(val > max)
 					max = val
 		return max
-		
+
+	printQ: () ->
+		postMessage {Q:"Q"}
+		i = @endPoint[1]
+		while i>=0
+			postMessage {i:i}
+			for en in @Q.entries()
+				if Math.abs(en[0].gates_dists[0][1]-i) < 0.1
+					for ac_en in en[1].entries()
+						postMessage {state_x:en[0].gates_dists[0][0],actions:ac_en[0].dest[0], val:ac_en[1]}
+			i-=@env.dy;
+
+	printMinRide: () ->
+		min = 10
+		for g in all_gates
+			if g < min
+				min = g
+		postMessage {min:min}
+
 @Learning = Learning
