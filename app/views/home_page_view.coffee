@@ -146,6 +146,9 @@ module.exports = class HomePageView extends PageView
 		@dancers = @$('#dancers')
 		@success =  @$('#success')
 		@nsolved = @$('#nsolved')
+		@bestWeHave = @$('#bestWeHave')
+		@bestYouFound = @$('#bestYouFound')
+		@bestTimeUserFound = null
 		@musicoff = @$('#musicoff')
 		@musicoff.click () =>
 			@$('#game').remove()
@@ -253,7 +256,6 @@ module.exports = class HomePageView extends PageView
 		@getProblemButton.hide()
 		@dancers.show()
 		@computationContainer.show()
-		console.log "LOOOOOL"
 		@worker.onmessage = (event) =>
 			i += 1
 			if (event.data.type == 'final')
@@ -262,13 +264,19 @@ module.exports = class HomePageView extends PageView
 				@renderResults event.data
 				event.data.problem_id = @problemId
 				event.data.type = "GIANT_RESULT"
-				@dancers.fadeOut()
+				@dancers.fadeOut
 				@success.show()	
+				if (not @bestTimeUserFound) or @bestTimeUserFound > event.data.bestTime
+					@bestTimeUserFound = event.data.bestTime
+					@bestYouFound.html(event.data.bestTime)
 				@problem.postResult event.data, () =>
-					@problem.load @onSuccess
+					@work()
 					@success.hide()		
 					@numberOfSolved += 1
 					@nsolved.html(@numberOfSolved)
+					
+					@problem.getBestResult (bestResultInDb) =>
+						@bestWeHave.html(bestResultInDb)
 			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data

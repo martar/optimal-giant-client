@@ -23,6 +23,18 @@ module.exports = class Problem extends Model
 				onSuccess data
 			error: (evt) ->
 				console.dir "[Client][REST]  Error getting the prolem instance: #{evt}"
+	# get the best result for this problem
+	getBestResult: (onSuccess) =>
+		$.ajax
+			type: 'GET'
+			url: SERVER_URL + "result/" + @get '_id'
+			dataType: "json"
+			success: (data) => 
+				console.dir "[Client][REST]  Success getting the best result"
+				onSuccess(data.bestTimeInDb)
+			error: (evt) ->
+				console.dir "[Client][REST]  Error getting the best result:"
+				console.dir evt
 				
 	postResult: (result, onSuccess) =>
 		$.ajax

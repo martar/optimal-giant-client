@@ -742,6 +742,8 @@ window.require.define({"models/problem": function(exports, require, module) {
     function Problem() {
       this.postResult = __bind(this.postResult, this);
 
+      this.getBestResult = __bind(this.getBestResult, this);
+
       this.load = __bind(this.load, this);
       return Problem.__super__.constructor.apply(this, arguments);
     }
@@ -770,6 +772,23 @@ window.require.define({"models/problem": function(exports, require, module) {
         },
         error: function(evt) {
           return console.dir("[Client][REST]  Error getting the prolem instance: " + evt);
+        }
+      });
+    };
+
+    Problem.prototype.getBestResult = function(onSuccess) {
+      var _this = this;
+      return $.ajax({
+        type: 'GET',
+        url: SERVER_URL + "result/" + this.get('_id'),
+        dataType: "json",
+        success: function(data) {
+          console.dir("[Client][REST]  Success getting the best result");
+          return onSuccess(data.bestTimeInDb);
+        },
+        error: function(evt) {
+          console.dir("[Client][REST]  Error getting the best result:");
+          return console.dir(evt);
         }
       });
     };
@@ -1158,6 +1177,9 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.dancers = this.$('#dancers');
       this.success = this.$('#success');
       this.nsolved = this.$('#nsolved');
+      this.bestWeHave = this.$('#bestWeHave');
+      this.bestYouFound = this.$('#bestYouFound');
+      this.bestTimeUserFound = null;
       this.musicoff = this.$('#musicoff');
       this.musicoff.click(function() {
         return _this.$('#game').remove();
@@ -1296,7 +1318,6 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.getProblemButton.hide();
       this.dancers.show();
       this.computationContainer.show();
-      console.log("LOOOOOL");
       this.worker.onmessage = function(event) {
         i += 1;
         if (event.data.type === 'final') {
@@ -1304,13 +1325,20 @@ window.require.define({"views/home_page_view": function(exports, require, module
           _this.renderResults(event.data);
           event.data.problem_id = _this.problemId;
           event.data.type = "GIANT_RESULT";
-          _this.dancers.fadeOut();
+          _this.dancers.fadeOut;
           _this.success.show();
+          if ((!_this.bestTimeUserFound) || _this.bestTimeUserFound > event.data.bestTime) {
+            _this.bestTimeUserFound = event.data.bestTime;
+            _this.bestYouFound.html(event.data.bestTime);
+          }
           _this.problem.postResult(event.data, function() {
-            _this.problem.load(_this.onSuccess);
+            _this.work();
             _this.success.hide();
             _this.numberOfSolved += 1;
-            return _this.nsolved.html(_this.numberOfSolved);
+            _this.nsolved.html(_this.numberOfSolved);
+            return _this.problem.getBestResult(function(bestResultInDb) {
+              return _this.bestWeHave.html(bestResultInDb);
+            });
           });
         }
         if (event.data.type === 'intermediate') {
@@ -1473,7 +1501,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "﻿<div class=\"container\">\r\n	<div class=\"row\">\r\n	  \r\n		<center>\r\n			<h2>\r\n			We find the fastest track, the alpine skier should take in order to win!\r\n			</h2>\r\n			<h4>\r\n				Created as a master thesis at AGH University of Science and Technology.</br>March 2012 - May 2013.\r\n				<img style=\"margin: 10px;\" src=\"img/test/notepad.gif\">\r\n			</h4>\r\n			<div>	\r\n			<img src=\"img/test/new.gif\">\r\n			<button id=\"get-problem-button\" class=\"btn btn-primary\"> Show me !! </button>\r\n			<div id=\"dancers\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n			</div>\r\n			</div>\r\n			<div class=\"fb-like\" data-href=\"http://giant-client.herokuapp.com/\" data-width=\"450\" data-show-faces=\"true\"></div>\r\n			<div id=\"success\" class=\"alert alert-success\" style=\"display: none;\" >\r\n				<a class=\"close\">×</a>\r\n				<strong>Success</strong>Thanks - we got result of your computation. All world skiers will love you! Note that every time you or your frineds click the button and start the computations, this first world problem is closer to be solved! So share!\r\n		\r\n			  </div>\r\n		</center>\r\n	</div>\r\n	<div class=\"row\" id=\"computation\" >\r\n		<h4>\r\n			What you see here is a giant slalom and our algorithm that finds the fastest tract for the skier. The problem instance was requested from our server. All the computations are run in your browser and will be send to our server once it is done. \r\n		</h4>\r\n		<h3>Number of solved problems: <span id=\"nsolved\"> 0 </span></h3>\r\n		\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n		<h2> Relax. While the computations are running, you can play the game. </h2>\r\n		<a id=\"musicoff\" class=\"btn btn-info btn-large\" href=\"#\">Turn off the music!! (but the game will disappear :/)</a>\r\n		<!-- <iframe id=\"game\" width=\"100%\" height=\"600px\" src=\"http://uploads.ungrounded.net/473000/473755_skifree.swf\"></iframe> -->\r\n	</div>\r\n	\r\n	\r\n				<center>\r\n        <img src=\"img/test/yahooweek.gif\">\r\n        <img src=\"img/test/community.gif\">\r\n        <img src=\"img/test/wabwalk.gif\">\r\n        <img src=\"img/test/webtrips.gif\">\r\n      </center>\r\n	\r\n	  <div>\r\n	  </br>\r\n	  </br>\r\n	  <p class=\"pull-right\" style=\"margin-top: -14px\"><img src=\"img/test/hacker.gif\">&nbsp; Built by Anna Skiba, Marta Ryłko & dr. inż. Roman Dębski <a href=\"https://github.com/martar/optimal-gigant/wiki\">More details behind this project..</a></p>\r\n		\r\n	  </div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
+    return "﻿<div class=\"container\">\r\n	<div class=\"row\">\r\n	  \r\n		<center>\r\n			<h2>\r\n			We find the fastest track, the alpine skier should take in order to win!\r\n			</h2>\r\n			<h4>\r\n				Created as a master thesis at AGH University of Science and Technology.</br>March 2012 - May 2013.\r\n				<img style=\"margin: 10px;\" src=\"img/test/notepad.gif\">\r\n			</h4>\r\n			<div>	\r\n			<img src=\"img/test/new.gif\">\r\n			<button id=\"get-problem-button\" class=\"btn btn-primary\"> Show me !! </button>\r\n			<div id=\"dancers\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n			</div>\r\n			</div>\r\n			<div class=\"fb-like\" data-href=\"http://giant-client.herokuapp.com/\" data-width=\"450\" data-show-faces=\"true\"></div>\r\n			<div id=\"success\" class=\"alert alert-success\" style=\"display: none;\" >\r\n				<a class=\"close\">×</a>\r\n				<strong>Success</strong>Thanks - we got result of your computation. All world skiers will love you! Note that every time you or your frineds click the button and start the computations, this first world problem is closer to be solved! So share!\r\n		\r\n			  </div>\r\n		</center>\r\n	</div>\r\n	<div class=\"row\" id=\"computation\" >\r\n		<h4>\r\n			What you see here is a giant slalom and our algorithm that finds the fastest tract for the skier. The problem instance was requested from our server. All the computations are run in your browser and will be send to our server once it is done. \r\n		</h4>\r\n		<h3>Number of solved problems: <span id=\"nsolved\"> 0 </span></h3>\r\n		<h3>Best time you found: <span id=\"bestYouFound\"> 0 </span></h3>\r\n		<h3>Best time we have so far: <span id=\"bestWeHave\"> 0 </span></h3>\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n		<h2> Relax. While the computations are running, you can play the game. </h2>\r\n		<a id=\"musicoff\" class=\"btn btn-info btn-large\" href=\"#\">Turn off the music!! (but the game will disappear :/)</a>\r\n		<!-- <iframe id=\"game\" width=\"100%\" height=\"600px\" src=\"http://uploads.ungrounded.net/473000/473755_skifree.swf\"></iframe> -->\r\n	</div>\r\n	\r\n	\r\n				<center>\r\n        <img src=\"img/test/yahooweek.gif\">\r\n        <img src=\"img/test/community.gif\">\r\n        <img src=\"img/test/wabwalk.gif\">\r\n        <img src=\"img/test/webtrips.gif\">\r\n      </center>\r\n	\r\n	  <div>\r\n	  </br>\r\n	  </br>\r\n	  <p class=\"pull-right\" style=\"margin-top: -14px\"><img src=\"img/test/hacker.gif\">&nbsp; Built by Anna Skiba, Marta Ryłko & dr. inż. Roman Dębski <a href=\"https://github.com/martar/optimal-gigant/wiki\">More details behind this project..</a></p>\r\n		\r\n	  </div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
