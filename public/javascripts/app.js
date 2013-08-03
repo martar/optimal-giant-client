@@ -733,7 +733,7 @@ window.require.define({"models/problem": function(exports, require, module) {
 
   Model = require('models/base/model');
 
-  SERVER_URL = 'http://giant-server.herokuapp.com:80/';
+  SERVER_URL = 'http://localhost:5000/';
 
   module.exports = Problem = (function(_super) {
 
@@ -768,7 +768,9 @@ window.require.define({"models/problem": function(exports, require, module) {
           _this.set(data);
           return onSuccess(data);
         },
-        error: function(evt) {}
+        error: function(evt) {
+          return console.dir("[Client][REST]  Error getting the prolem instance: " + evt);
+        }
       });
     };
 
@@ -783,7 +785,9 @@ window.require.define({"models/problem": function(exports, require, module) {
           console.dir(data);
           return onSuccess(data);
         },
-        error: function(evt) {}
+        error: function(evt) {
+          return console.dir("[Client][REST] Error posting the result: " + evt);
+        }
       });
     };
 
@@ -1137,9 +1141,10 @@ window.require.define({"views/home_page_view": function(exports, require, module
     }
 
     HomePageView.prototype.onSuccess = function(result) {
-      console.log("ON SYNKKK");
-      this.giantGates = this.problem.attributes.value.giantGates;
-      this.closedGates = this.problem.attributes.value.closedGates;
+      this.problemId = this.problem.attributes._id;
+      this.giantGates = this.problem.attributes.giantGates;
+      this.closedGates = this.problem.attributes.closedGates;
+      this.hasLeftSidePollGates = this.problem.attributes.hasLeftSidePollGates;
       return this.work();
     };
 
@@ -1225,17 +1230,22 @@ window.require.define({"views/home_page_view": function(exports, require, module
     };
 
     HomePageView.prototype.drawGates = function() {
-      var closerDistanceSkierPole, factor, flagWidth, gate, gateWidth, gates, isClosed, pair, x, y, _i, _len, _ref;
-      gates = zip(this.giantGates, this.closedGates);
+      var closerDistanceSkierPole, factor, flagWidth, gate, gateWidth, gates, i, isClosed, isLeft, pair, x, y, _i, _len, _ref;
+      gates = zip(this.giantGates, this.closedGates, this.hasLeftSidePollGates);
       flagWidth = 0.75;
-      gateWidth = 6;
+      gateWidth = 10;
       closerDistanceSkierPole = 0.2;
-      factor = -1;
       _ref = gates.slice(0);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        gate = _ref[_i];
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        gate = _ref[i];
         pair = gate[0];
         isClosed = gate[1];
+        isLeft = gate[2];
+        if (isLeft) {
+          factor = 1;
+        } else {
+          factor = -1;
+        }
         this.context.beginPath();
         this.context.lineWidth = 5;
         if (this.toggle) {
@@ -1252,11 +1262,10 @@ window.require.define({"views/home_page_view": function(exports, require, module
           this.context.lineTo(transX(pair[0] - factor * (gateWidth + flagWidth)), y);
           this.context.stroke();
         } else {
-          this.context.moveTo(x, transX(pair[1] + gateWidth - 2 * flagWidth));
+          this.context.moveTo(x, transY(pair[1] + gateWidth - 2 * flagWidth));
           this.context.lineTo(transX(pair[0] + factor * (closerDistanceSkierPole + flagWidth)), transY(pair[1] + gateWidth - 2 * flagWidth));
           this.context.stroke();
         }
-        factor = factor * (-1);
         this.toggle = !this.toggle;
       }
       this.context.lineWidth = 1;
@@ -1287,12 +1296,14 @@ window.require.define({"views/home_page_view": function(exports, require, module
       this.getProblemButton.hide();
       this.dancers.show();
       this.computationContainer.show();
+      console.log("LOOOOOL");
       this.worker.onmessage = function(event) {
         i += 1;
         if (event.data.type === 'final') {
           _this.draw(event.data);
           _this.renderResults(event.data);
-          console.dir(event.data);
+          event.data.problem_id = _this.problemId;
+          event.data.type = "GIANT_RESULT";
           _this.dancers.fadeOut();
           _this.success.show();
           _this.problem.postResult(event.data, function() {
@@ -1312,7 +1323,8 @@ window.require.define({"views/home_page_view": function(exports, require, module
         }
       };
       return this.worker.postMessage({
-        gates: zip(this.giantGates, this.closedGates)
+        gates: zip(this.giantGates, this.closedGates),
+        hasLeftSidePollGates: this.hasLeftSidePollGates
       });
     };
 
@@ -1461,7 +1473,7 @@ window.require.define({"views/templates/home": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "﻿<div class=\"container\">\r\n	<div class=\"row\">\r\n	  \r\n		<center>\r\n			<h2>\r\n			We find the fastest track, the alpine skier should take in order to win!\r\n			</h2>\r\n			<h4>\r\n				Created as a master thesis at AGH University of Science and Technology.</br>March 2012 - May 2013.\r\n				<img style=\"margin: 10px;\" src=\"img/test/notepad.gif\">\r\n			</h4>\r\n			<div>	\r\n			<img src=\"img/test/new.gif\">\r\n			<button id=\"get-problem-button\" class=\"btn btn-primary\"> Show me !! </button>\r\n			<div id=\"dancers\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n			</div>\r\n			</div>\r\n			<div class=\"fb-like\" data-href=\"http://giant-client.herokuapp.com/\" data-width=\"450\" data-show-faces=\"true\"></div>\r\n			<div id=\"success\" class=\"alert alert-success\" style=\"display: none;\" >\r\n				<a class=\"close\">×</a>\r\n				<strong>Success</strong>Thanks - we got result of your computation. All world skiers will love you! Note that every time you or your frineds click the button and start the computations, this first world problem is closer to be solved! So share!\r\n		\r\n			  </div>\r\n		</center>\r\n	</div>\r\n	<div class=\"row\" id=\"computation\" >\r\n		<h4>\r\n			What you see here is a giant slalom and our algorithm that finds the fastest tract for the skier. The problem instance was requested from our server. All the computations are run in your browser and will be send to our server once it is done. \r\n		</h4>\r\n		<h3>Number of solved problems: <span id=\"nsolved\"> 0 </span></h3>\r\n		\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n		<h2> Relax. While the computations are running, you can play the game. </h2>\r\n		<a id=\"musicoff\" class=\"btn btn-info btn-large\" href=\"#\">Turn off the music!! (but the game will disappear :/)</a>\r\n		<iframe id=\"game\" width=\"100%\" height=\"600px\" src=\"http://uploads.ungrounded.net/473000/473755_skifree.swf\"></iframe>\r\n	</div>\r\n	\r\n	\r\n				<center>\r\n        <img src=\"img/test/yahooweek.gif\">\r\n        <img src=\"img/test/community.gif\">\r\n        <img src=\"img/test/wabwalk.gif\">\r\n        <img src=\"img/test/webtrips.gif\">\r\n      </center>\r\n	\r\n	  <div>\r\n	  </br>\r\n	  </br>\r\n	  <p class=\"pull-right\" style=\"margin-top: -14px\"><img src=\"img/test/hacker.gif\">&nbsp; Built by Anna Skiba, Marta Ryłko & dr. inż. Roman Dębski <a href=\"https://github.com/martar/optimal-gigant/wiki\">More details behind this project..</a></p>\r\n		\r\n	  </div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
+    return "﻿<div class=\"container\">\r\n	<div class=\"row\">\r\n	  \r\n		<center>\r\n			<h2>\r\n			We find the fastest track, the alpine skier should take in order to win!\r\n			</h2>\r\n			<h4>\r\n				Created as a master thesis at AGH University of Science and Technology.</br>March 2012 - May 2013.\r\n				<img style=\"margin: 10px;\" src=\"img/test/notepad.gif\">\r\n			</h4>\r\n			<div>	\r\n			<img src=\"img/test/new.gif\">\r\n			<button id=\"get-problem-button\" class=\"btn btn-primary\"> Show me !! </button>\r\n			<div id=\"dancers\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n				<img src=\"img/test/mchammer.gif\">\r\n			</div>\r\n			</div>\r\n			<div class=\"fb-like\" data-href=\"http://giant-client.herokuapp.com/\" data-width=\"450\" data-show-faces=\"true\"></div>\r\n			<div id=\"success\" class=\"alert alert-success\" style=\"display: none;\" >\r\n				<a class=\"close\">×</a>\r\n				<strong>Success</strong>Thanks - we got result of your computation. All world skiers will love you! Note that every time you or your frineds click the button and start the computations, this first world problem is closer to be solved! So share!\r\n		\r\n			  </div>\r\n		</center>\r\n	</div>\r\n	<div class=\"row\" id=\"computation\" >\r\n		<h4>\r\n			What you see here is a giant slalom and our algorithm that finds the fastest tract for the skier. The problem instance was requested from our server. All the computations are run in your browser and will be send to our server once it is done. \r\n		</h4>\r\n		<h3>Number of solved problems: <span id=\"nsolved\"> 0 </span></h3>\r\n		\r\n		<div class=\"span4\">\r\n			<div id=\"stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n			<div id=\"general_stats_container\" style=\"width: 400px; height: 400px;\"></div>\r\n		</div>\r\n		<div class=\"span8\">\r\n			<canvas id=\"slope\" width=\"3000px\" height=\"1500px\"></canvas>\r\n		</div>\r\n		<h2> Relax. While the computations are running, you can play the game. </h2>\r\n		<a id=\"musicoff\" class=\"btn btn-info btn-large\" href=\"#\">Turn off the music!! (but the game will disappear :/)</a>\r\n		<!-- <iframe id=\"game\" width=\"100%\" height=\"600px\" src=\"http://uploads.ungrounded.net/473000/473755_skifree.swf\"></iframe> -->\r\n	</div>\r\n	\r\n	\r\n				<center>\r\n        <img src=\"img/test/yahooweek.gif\">\r\n        <img src=\"img/test/community.gif\">\r\n        <img src=\"img/test/wabwalk.gif\">\r\n        <img src=\"img/test/webtrips.gif\">\r\n      </center>\r\n	\r\n	  <div>\r\n	  </br>\r\n	  </br>\r\n	  <p class=\"pull-right\" style=\"margin-top: -14px\"><img src=\"img/test/hacker.gif\">&nbsp; Built by Anna Skiba, Marta Ryłko & dr. inż. Roman Dębski <a href=\"https://github.com/martar/optimal-gigant/wiki\">More details behind this project..</a></p>\r\n		\r\n	  </div>\r\n	<!--<div class=\"row\">\r\n		<div class=\"span12\">\r\n				<img id=\"image\" width=\"3000px\" height=\"5000px\" src=\"img/lol.jpg\" ></img>\r\n		</div>\r\n	</div>-->\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

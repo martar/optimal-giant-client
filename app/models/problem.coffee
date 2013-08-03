@@ -1,5 +1,7 @@
 Model = require 'models/base/model'
-SERVER_URL = 'http://giant-server.herokuapp.com:80/'
+# SERVER_URL = 'http://giant-server.herokuapp.com:80/'
+SERVER_URL = 'http://localhost:5000/'
+
 
 module.exports = class Problem extends Model
 	defaults:
@@ -20,7 +22,7 @@ module.exports = class Problem extends Model
 				@set data
 				onSuccess data
 			error: (evt) ->
-				# console.log "[Client][REST]  Error getting the prolem instance: #{evt}"
+				console.dir "[Client][REST]  Error getting the prolem instance: #{evt}"
 				
 	postResult: (result, onSuccess) =>
 		$.ajax
@@ -33,4 +35,4 @@ module.exports = class Problem extends Model
 				console.dir data
 				onSuccess data
 			error: (evt) ->
-				# console.log "[Client][REST] Error posting the result: #{evt}"
+				console.dir "[Client][REST] Error posting the result: #{evt}"

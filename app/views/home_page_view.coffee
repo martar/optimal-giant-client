@@ -128,12 +128,13 @@ module.exports = class HomePageView extends PageView
 		super
 		
 	onSuccess: (result) =>
-		console.log "ON SYNKKK"
 		#@giantGates =  [[3,10],[-5,30],[4,50],[-4,65],[-16,80],[-6,100],[-13,120],[-10,135]]
 		#@closedGates =  [0,0,0,0,0,0,0,0]
-		@giantGates = @problem.attributes.value.giantGates
-		# masks that point out which gates are the closed gates(1) and which are reguklar, open gates(0)
-		@closedGates = @problem.attributes.value.closedGates
+		@problemId = @problem.attributes._id
+		@giantGates = @problem.attributes.giantGates
+		# closedGates and hasLeftSidePollGatces are masks that point out which where is the closing poll of the gate and whether it is a closed or open gate (eneeded for visualization)
+		@closedGates = @problem.attributes.closedGates
+		@hasLeftSidePollGates = @problem.attributes.hasLeftSidePollGates
 		@work()
 		
 	afterRender: =>
@@ -193,15 +194,19 @@ module.exports = class HomePageView extends PageView
 		@context.stroke()
 			
 	drawGates: () =>
-		gates = zip(@giantGates,@closedGates)
+		gates = zip(@giantGates,@closedGates, @hasLeftSidePollGates)
 		flagWidth = 0.75 # wigth of the flag between pols in meters
-		gateWidth = 6 # between 4 and 8 m
+		gateWidth = 10 # between 4 and 8 m
 		closerDistanceSkierPole = 0.2 # closest distance between the inner edge of skis and the outter pole of the turn gate
 		# toggle flag for correct red/blue gates assignemt
-		factor = -1
-		for gate in gates[0..]
+		for gate, i in gates[0..]
 			pair = gate[0]
 			isClosed = gate[1]
+			isLeft = gate[2]
+			if isLeft
+			  factor = 1
+			else 
+			  factor = -1
 			@context.beginPath()
 			@context.lineWidth = 5
 			if (@toggle)
@@ -216,14 +221,12 @@ module.exports = class HomePageView extends PageView
 				@context.moveTo transX(pair[0]-factor*gateWidth), y
 				@context.lineTo transX(pair[0]-factor*(gateWidth + flagWidth)), y
 				@context.stroke()
-				
 			else
 				# closed gate so put the gate in the line of the slope
-				@context.moveTo x, transX(pair[1] + gateWidth - 2*flagWidth)
-				@context.lineTo transX(pair[0]+factor* (closerDistanceSkierPole+flagWidth)),transY(pair[1] + gateWidth - 2*flagWidth)
+				@context.moveTo x, transY(pair[1] + gateWidth - 2*flagWidth)
+				@context.lineTo transX(pair[0]+factor* (closerDistanceSkierPole+flagWidth)), transY(pair[1] + gateWidth - 2*flagWidth)
 				@context.stroke()
 				# do not toggle the color
-			factor = factor*(-1)
 			@toggle = !@toggle
 		@context.lineWidth = 1
 		@context.strokeStyle = 'black'
@@ -250,13 +253,15 @@ module.exports = class HomePageView extends PageView
 		@getProblemButton.hide()
 		@dancers.show()
 		@computationContainer.show()
+		console.log "LOOOOOL"
 		@worker.onmessage = (event) =>
 			i += 1
 			if (event.data.type == 'final')
 				@draw event.data
 				# console.log event.data
 				@renderResults event.data
-				console.dir event.data
+				event.data.problem_id = @problemId
+				event.data.type = "GIANT_RESULT"
 				@dancers.fadeOut()
 				@success.show()	
 				@problem.postResult event.data, () =>
@@ -273,7 +278,7 @@ module.exports = class HomePageView extends PageView
 			else
 				console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
-		@worker.postMessage({gates:zip(@giantGates,@closedGates)})
+		@worker.postMessage({gates:zip(@giantGates,@closedGates), hasLeftSidePollGates: @hasLeftSidePollGates})
 	
 zip = () ->
   lengthArray = (arr.length for arr in arguments)

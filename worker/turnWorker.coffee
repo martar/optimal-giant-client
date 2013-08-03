@@ -7,11 +7,9 @@ importScripts 'localOptAlgorithm.js'
 self.onmessage = (ev) ->
 	start = Date.now()
 	populationCount = 30
-
 	vLen = 0.1 # 0.0000001
-	left = [0,1,0,0,1,0,1,0]
-	#left = [0,1,0,1,0,1,0,1]
-	gates = (new Gate(gate,left[i]) for gate,i in ev.data.gates)
+	hasLeftSidePollGates = ev.data.hasLeftSidePollGates
+	gates = (new Gate(gate,hasLeftSidePollGates[i]) for gate,i in ev.data.gates)
 	pop = new PointTurns(4,populationCount,vLen,gates)
 	crossNr = 10
 
