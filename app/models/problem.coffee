@@ -1,6 +1,6 @@
 Model = require 'models/base/model'
-# SERVER_URL = 'http://giant-server.herokuapp.com:80/'
-SERVER_URL = 'http://localhost:5000/'
+# SERVER_URI = 'http://giant-server.herokuapp.com:80/'
+SERVER_URI = process.env.SERVER_URI ? 'http://localhost:5000/'
 
 
 module.exports = class Problem extends Model
@@ -16,7 +16,7 @@ module.exports = class Problem extends Model
 	load: (onSuccess) =>
 		$.ajax
 			type: 'GET'
-			url: SERVER_URL + "slalom"
+			url: SERVER_URI + "slalom"
 			dataType: "json"
 			success: (data) => 
 				@set data
@@ -27,7 +27,7 @@ module.exports = class Problem extends Model
 	getBestResult: (onSuccess) =>
 		$.ajax
 			type: 'GET'
-			url: SERVER_URL + "result/" + @get '_id'
+			url: SERVER_URI + "result/" + @get '_id'
 			dataType: "json"
 			success: (data) => 
 				console.dir "[Client][REST]  Success getting the best result"
@@ -39,7 +39,7 @@ module.exports = class Problem extends Model
 	postResult: (result, onSuccess) =>
 		$.ajax
 			type: 'POST'
-			url: SERVER_URL + "slalom"
+			url: SERVER_URI + "slalom"
 			data: result
 			dataType: "json"
 			ContentType: "application/json; charset=UTF-8"
