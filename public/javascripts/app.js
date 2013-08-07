@@ -726,14 +726,14 @@ window.require.define({"models/header": function(exports, require, module) {
 }});
 
 window.require.define({"models/problem": function(exports, require, module) {
-  var Model, Problem, SERVER_URL,
+  var Model, Problem, SERVER_URI, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Model = require('models/base/model');
 
-  SERVER_URL = 'http://localhost:5000/';
+  SERVER_URI = (_ref = typeof process !== "undefined" && process !== null ? (_ref1 = process.env) != null ? _ref1.SERVER_URI : void 0 : void 0) != null ? _ref : 'http://localhost:5000/';
 
   module.exports = Problem = (function(_super) {
 
@@ -764,7 +764,7 @@ window.require.define({"models/problem": function(exports, require, module) {
       var _this = this;
       return $.ajax({
         type: 'GET',
-        url: SERVER_URL + "slalom",
+        url: SERVER_URI + "slalom",
         dataType: "json",
         success: function(data) {
           _this.set(data);
@@ -780,7 +780,7 @@ window.require.define({"models/problem": function(exports, require, module) {
       var _this = this;
       return $.ajax({
         type: 'GET',
-        url: SERVER_URL + "result/" + this.get('_id'),
+        url: SERVER_URI + "result/" + this.get('_id'),
         dataType: "json",
         success: function(data) {
           console.dir("[Client][REST]  Success getting the best result");
@@ -796,7 +796,7 @@ window.require.define({"models/problem": function(exports, require, module) {
     Problem.prototype.postResult = function(result, onSuccess) {
       return $.ajax({
         type: 'POST',
-        url: SERVER_URL + "slalom",
+        url: SERVER_URI + "slalom",
         data: result,
         dataType: "json",
         ContentType: "application/json; charset=UTF-8",
