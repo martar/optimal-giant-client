@@ -726,14 +726,14 @@ window.require.define({"models/header": function(exports, require, module) {
 }});
 
 window.require.define({"models/problem": function(exports, require, module) {
-  var Model, Problem, SERVER_URI, _ref, _ref1,
+  var Model, Problem, SERVER_URI,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Model = require('models/base/model');
 
-  SERVER_URI = (_ref = typeof process !== "undefined" && process !== null ? (_ref1 = process.env) != null ? _ref1.SERVER_URI : void 0 : void 0) != null ? _ref : 'http://localhost:5000/';
+  SERVER_URI = 'http://giant-server.herokuapp.com:80/' != null ? 'http://giant-server.herokuapp.com:80/' : 'http://localhost:5000/';
 
   module.exports = Problem = (function(_super) {
 
