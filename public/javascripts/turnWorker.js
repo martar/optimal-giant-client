@@ -10,18 +10,18 @@
   importScripts('localOptAlgorithm.js');
 
   self.onmessage = function(ev) {
-    var a, bestLocal, bestsAndWorstInIterations, crossNr, duration, gate, gates, i, lambda, left, mutateProb, pop, populationCount, skier, skiers, start, vLen;
+    var a, bestLocal, bestsAndWorstInIterations, crossNr, duration, gate, gates, hasLeftSidePollGates, i, lambda, mutateProb, pop, populationCount, skier, skiers, start, vLen;
     start = Date.now();
     populationCount = 30;
     vLen = 0.1;
-    left = [0, 1, 0, 0, 1, 0, 1, 0];
+    hasLeftSidePollGates = ev.data.hasLeftSidePollGates;
     gates = (function() {
       var _i, _len, _ref, _results;
       _ref = ev.data.gates;
       _results = [];
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         gate = _ref[i];
-        _results.push(new Gate(gate, left[i]));
+        _results.push(new Gate(gate, hasLeftSidePollGates[i]));
       }
       return _results;
     })();

@@ -216,7 +216,8 @@
           postMessage({
             type: 'intermediate',
             best: this.popul.idvs[0].skier.positions,
-            pts: this.popul.idvs[0].value
+            pts: this.popul.idvs[0].value,
+            currentResult: this.popul.idvs[0].skier.result
           });
           if (i % 2 === 0) {
             this.stats.feed(this.popul.idvs);
@@ -226,7 +227,8 @@
           postMessage({
             type: 'intermediate',
             best: this.popul.idvs[0].skier.positions,
-            pts: this.popul.idvs[0].value
+            pts: this.popul.idvs[0].value,
+            currentResult: this.popul.idvs[0].skier.result
           });
           _results.push([theBest, theWorst]);
         }

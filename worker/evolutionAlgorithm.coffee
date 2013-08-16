@@ -159,7 +159,6 @@ class Optimization
 			# add mutated inds to population
 			for ind in mutatedInd
 				@popul.idvs.push(ind)
-				#postMessage {type: 'intermediate', best:ind.skier.positions, pts: ind.value}
 				
 			# sort population
 			@popul.idvs = _.sortBy(@popul.idvs,'fitness')			
@@ -168,14 +167,14 @@ class Optimization
 			@popul.idvs = @popul.idvs[0..(@size-1)]
 			
 			i+=1
-			postMessage {type: 'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value}
+			postMessage {type: 'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value, currentResult: @popul.idvs[0].skier.result}
 			
 			if ( i % 2 == 0)
 				@stats.feed(@popul.idvs)
 			
 			theBest = @popul.idvs[0].fitness
 			theWorst = @popul.idvs[@size-1].fitness
-			postMessage(type:'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value )
+			postMessage(type:'intermediate', best:@popul.idvs[0].skier.positions, pts: @popul.idvs[0].value, currentResult: @popul.idvs[0].skier.result )
 			[theBest,theWorst]
 		return bestResults
 	

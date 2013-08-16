@@ -135,6 +135,7 @@ module.exports = class HomePageView extends PageView
 		# closedGates and hasLeftSidePollGatces are masks that point out which where is the closing poll of the gate and whether it is a closed or open gate (eneeded for visualization)
 		@closedGates = @problem.attributes.closedGates
 		@hasLeftSidePollGates = @problem.attributes.hasLeftSidePollGates
+		@bestWeHave.html(@problem.attributes.bestTimeInDb)
 		@work()
 		
 	afterRender: =>
@@ -149,11 +150,21 @@ module.exports = class HomePageView extends PageView
 		@bestWeHave = @$('#bestWeHave')
 		@bestYouFound = @$('#bestYouFound')
 		@bestTimeUserFound = null
-		@musicoff = @$('#musicoff')
-		@musicoff.click () =>
-			@$('#game').remove()
+		@currentlyYouFound = @$('#currentlyYouFound')
 		@numberOfSolved = 0
 		@computationContainer = @$('#computation')
+		@game = $('<iframe id="game" width="100%" height="600px" src="http://uploads.ungrounded.net/473000/473755_skifree.swf"></iframe>')
+		@musicoff = @$('#musicoff')
+		@musicoff.hide()
+		@musicoff.click () =>
+			@$('#game').remove()
+			@musicoff.hide()
+			@musicon.show()
+		@musicon = @$('#musicon')
+		@musicon.click () =>
+			@computationContainer.append(@game)
+			@musicon.hide()
+			@musicoff.show()
 		@getProblemButton.click () =>
 			@problem.load @onSuccess
 			@success.hide()
@@ -280,11 +291,11 @@ module.exports = class HomePageView extends PageView
 			if(event.data.type == 'intermediate')
 				# clear the canvas
 				@drawIntermediate event.data
-				# console.log event.data
+				@currentlyYouFound.html(event.data.currentResult)
 			if (event.data.type == "stats")
 				@processStatistics event.data
 			else
-				console.log event.data
+				# console.log event.data
 			# alert "Computations finished in #{event.data[0]} seconds"
 		@worker.postMessage({gates:zip(@giantGates,@closedGates), hasLeftSidePollGates: @hasLeftSidePollGates})
 	
