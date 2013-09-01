@@ -99,7 +99,7 @@ class Skier
 	###			
 	moveStraightToPoint : ( punishFactor, endPoint, accuracy = 0.01, sign_omega = 1) ->
 		reachedDestination = false
-		kappa = 0 #0.0000001
+		kappa = 0.0000001
 		v_len = punishFactor*Utils.vectorLength(@velocities[0])
 		while !reachedDestination
 			v =Utils.findCoords( endPoint, @positions[0], v_len)

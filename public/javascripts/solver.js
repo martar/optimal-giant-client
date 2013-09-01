@@ -177,7 +177,7 @@ this is a hack that enables the usage of this script in both: the browser via We
         sign_omega = 1;
       }
       reachedDestination = false;
-      kappa = 0;
+      kappa = 0.0000001;
       v_len = punishFactor * Utils.vectorLength(this.velocities[0]);
       _results = [];
       while (!reachedDestination) {
