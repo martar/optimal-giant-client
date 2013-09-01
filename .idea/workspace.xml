@@ -3,19 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="139798df-62f6-4ad6-b18d-531a4a2134b3" name="Default" comment="">
       <change type="DELETED" beforePath="E:\Projects\gigant\optimal-giant-client\public\images\computer.png" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/images/computer.png" afterPath="$PROJECT_DIR$/app/assets/images/computer.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/stylesheets/app.css" afterPath="$PROJECT_DIR$/public/stylesheets/app.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/index.html" afterPath="$PROJECT_DIR$/app/assets/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/index.html" afterPath="$PROJECT_DIR$/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/index.html" afterPath="$PROJECT_DIR$/public/test/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/javascripts/test-vendor.js" afterPath="$PROJECT_DIR$/public/test/javascripts/test-vendor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/stylesheets/test.css" afterPath="$PROJECT_DIR$/public/test/stylesheets/test.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/vendor.js" afterPath="$PROJECT_DIR$/public/javascripts/vendor.js" />
     </list>
     <ignored path="optimal-giant-client.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378025082847" ignored="false" />
-    <file path="/index.html" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378028214772" ignored="false" />
+    <file path="/index.html" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378028413692" ignored="false" />
     <file path="/home.hbs" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378026966548" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -78,7 +71,7 @@
       <file leaf-file-name="index.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/assets/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="84" selection-start="615" selection-end="615" vertical-scroll-proportion="0.33426967">
+            <state line="12" column="94" selection-start="717" selection-end="717" vertical-scroll-proportion="0.39650145">
               <folding />
             </state>
           </provider>
@@ -293,7 +286,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="REST Client" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31414473" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -410,7 +403,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="84" selection-start="615" selection-end="615" vertical-scroll-proportion="0.33426967">
+        <state line="12" column="94" selection-start="717" selection-end="717" vertical-scroll-proportion="0.39650145">
           <folding />
         </state>
       </provider>
