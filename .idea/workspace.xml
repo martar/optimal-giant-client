@@ -4,50 +4,20 @@
     <list default="true" id="139798df-62f6-4ad6-b18d-531a4a2134b3" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/stylesheets/app.css" afterPath="$PROJECT_DIR$/public/stylesheets/app.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/app.js" afterPath="$PROJECT_DIR$/public/javascripts/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/styles/bootstrap.min.css" afterPath="$PROJECT_DIR$/vendor/styles/bootstrap.min.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/bootstrap.min.js" afterPath="$PROJECT_DIR$/vendor/scripts/bootstrap.min.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/evolutionAlgorithm.coffee" afterPath="$PROJECT_DIR$/worker/evolutionAlgorithm.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/evolutionAlgorithm.js" afterPath="$PROJECT_DIR$/public/javascripts/evolutionAlgorithm.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/gate.coffee" afterPath="$PROJECT_DIR$/worker/gate.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/gauss.js" afterPath="$PROJECT_DIR$/public/javascripts/gauss.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/gauss.js" afterPath="$PROJECT_DIR$/worker/gauss.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/templates/home.hbs" afterPath="$PROJECT_DIR$/app/views/templates/home.hbs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/index.html" afterPath="$PROJECT_DIR$/app/assets/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/index.html" afterPath="$PROJECT_DIR$/public/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/index.html" afterPath="$PROJECT_DIR$/public/test/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/jquery.highcharts.a.js" afterPath="$PROJECT_DIR$/vendor/scripts/jquery.highcharts.a.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/jquery.highcharts.exporting.js" afterPath="$PROJECT_DIR$/vendor/scripts/jquery.highcharts.exporting.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.cursor.js" afterPath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.cursor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.dateAxisRenderer.js" afterPath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.dateAxisRenderer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.js" afterPath="$PROJECT_DIR$/vendor/scripts/jquery.jqplot.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/localOptAlgorithm.coffee" afterPath="$PROJECT_DIR$/worker/localOptAlgorithm.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/localOptAlgorithm.js" afterPath="$PROJECT_DIR$/public/javascripts/localOptAlgorithm.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/numeric.js" afterPath="$PROJECT_DIR$/public/javascripts/numeric.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/numeric.js" afterPath="$PROJECT_DIR$/worker/numeric.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/optimizePoints.coffee" afterPath="$PROJECT_DIR$/worker/optimizePoints.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/optimizePoints.js" afterPath="$PROJECT_DIR$/public/javascripts/optimizePoints.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/optimizePoints.js" afterPath="$PROJECT_DIR$/worker/optimizePoints.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.js" afterPath="$PROJECT_DIR$/server.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/solver.coffee" afterPath="$PROJECT_DIR$/worker/solver.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/solver.js" afterPath="$PROJECT_DIR$/public/javascripts/solver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/solver.js" afterPath="$PROJECT_DIR$/worker/solver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/statistics.coffee" afterPath="$PROJECT_DIR$/worker/statistics.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/statistics.js" afterPath="$PROJECT_DIR$/public/javascripts/statistics.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/statistics.js" afterPath="$PROJECT_DIR$/worker/statistics.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/javascripts/test-vendor.js" afterPath="$PROJECT_DIR$/public/test/javascripts/test-vendor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/test.coffee" afterPath="$PROJECT_DIR$/worker/test.coffee" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/stylesheets/test.css" afterPath="$PROJECT_DIR$/public/test/stylesheets/test.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/test/javascripts/test.js" afterPath="$PROJECT_DIR$/public/test/javascripts/test.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/test1.coffee" afterPath="$PROJECT_DIR$/worker/test1.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/test1.txt" afterPath="$PROJECT_DIR$/worker/test1.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/turnWorker.coffee" afterPath="$PROJECT_DIR$/worker/turnWorker.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/turnWorker.js" afterPath="$PROJECT_DIR$/public/javascripts/turnWorker.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/underscore.js" afterPath="$PROJECT_DIR$/public/javascripts/underscore.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/vendor.js" afterPath="$PROJECT_DIR$/public/javascripts/vendor.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/worker/worker.coffee" afterPath="$PROJECT_DIR$/worker/worker.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/javascripts/worker.js" afterPath="$PROJECT_DIR$/public/javascripts/worker.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="optimal-giant-client.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378025082847" ignored="false" />
+    <file path="/index.html" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378026461309" ignored="false" />
+    <file path="/home.hbs" changelist="139798df-62f6-4ad6-b18d-531a4a2134b3" time="1378026966548" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,10 +37,49 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="build.sh" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="build.sh" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/build.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="95" selection-start="727" selection-end="727" vertical-scroll-proportion="0.4450262">
+            <state line="10" column="95" selection-start="727" selection-end="727" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="home.hbs" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/views/templates/home.hbs">
+          <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
+            <state />
+          </provider>
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="251" selection-start="1549" selection-end="1549" vertical-scroll-proportion="0.33430234">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="header.hbs" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/templates/header.hbs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="layout.coffee" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/layout.coffee">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/assets/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="16" column="33" selection-start="888" selection-end="888" vertical-scroll-proportion="-7.8461537">
               <folding />
             </state>
           </provider>
@@ -89,6 +98,14 @@
   <component name="GitLogSettings">
     <option name="myDateState">
       <MyDateState />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="changedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/app/assets/index.html" />
+        <option value="$PROJECT_DIR$/app/views/templates/home.hbs" />
+      </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
@@ -138,6 +155,100 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="templates" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="assets" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="optimal-giant-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="assets" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="images" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -223,7 +334,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="REST Client" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31414473" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -309,7 +420,38 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/build.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="95" selection-start="727" selection-end="727" vertical-scroll-proportion="0.4450262">
+        <state line="10" column="95" selection-start="727" selection-end="727" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/templates/header.hbs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/layout.coffee">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/assets/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="33" selection-start="888" selection-end="888" vertical-scroll-proportion="-7.8461537">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/templates/home.hbs">
+      <provider editor-type-id="com.intellij.persistence.database.editor.CsvTableFileEditorProvider">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="251" selection-start="1549" selection-end="1549" vertical-scroll-proportion="0.33430234">
           <folding />
         </state>
       </provider>
