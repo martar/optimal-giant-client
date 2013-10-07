@@ -1324,15 +1324,20 @@ window.require.define({"views/home_page_view": function(exports, require, module
     };
 
     HomePageView.prototype.work = function() {
-      var i,
+      var i, startTime,
         _this = this;
       i = 0;
       this.getProblemButton.hide();
       this.dancers.show();
       this.computationContainer.show();
+      startTime = new Date().getTime();
       this.worker.onmessage = function(event) {
+        var endTime, time;
         i += 1;
         if (event.data.type === 'final') {
+          endTime = new Date().getTime();
+          time = (endTime - startTime) / 1000;
+          console.log("Execution time: " + time);
           _this.draw(event.data);
           _this.renderResults(event.data);
           event.data.problem_id = _this.problemId;

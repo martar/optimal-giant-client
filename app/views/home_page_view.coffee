@@ -267,25 +267,29 @@ module.exports = class HomePageView extends PageView
 		@getProblemButton.hide()
 		@dancers.show()
 		@computationContainer.show()
+		startTime = new Date().getTime()
 		@worker.onmessage = (event) =>
 			i += 1
 			if (event.data.type == 'final')
+				endTime = new Date().getTime()
+				time = (endTime - startTime)/1000
+				console.log "Execution time: " + time
 				@draw event.data
 				# console.log event.data
 				@renderResults event.data
 				event.data.problem_id = @problemId
 				event.data.type = "GIANT_RESULT"
 				@dancers.fadeOut
-				@success.show()	
+				@success.show()
 				if (not @bestTimeUserFound) or @bestTimeUserFound > event.data.bestTime
 					@bestTimeUserFound = event.data.bestTime
 					@bestYouFound.html(event.data.bestTime)
 				@problem.postResult event.data, () =>
 					@work()
-					@success.hide()		
+					@success.hide()
 					@numberOfSolved += 1
 					@nsolved.html(@numberOfSolved)
-					
+
 					@problem.getBestResult (bestResultInDb) =>
 						@bestWeHave.html(bestResultInDb)
 			if(event.data.type == 'intermediate')
