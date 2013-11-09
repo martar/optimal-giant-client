@@ -1,6 +1,6 @@
 Model = require 'models/base/model'
-SERVER_URI = 'http://giant-server.herokuapp.com:80/' ? 'http://localhost:5000/'
-
+# SERVER_URI = 'http://giant-server.herokuapp.com:80/' ? 'http://localhost:5000/'
+SERVER_URI = 'http://localhost:5000/'
 
 module.exports = class Problem extends Model
 	defaults:

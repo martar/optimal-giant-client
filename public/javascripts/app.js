@@ -733,7 +733,7 @@ window.require.define({"models/problem": function(exports, require, module) {
 
   Model = require('models/base/model');
 
-  SERVER_URI = 'http://giant-server.herokuapp.com:80/' != null ? 'http://giant-server.herokuapp.com:80/' : 'http://localhost:5000/';
+  SERVER_URI = 'http://localhost:5000/';
 
   module.exports = Problem = (function(_super) {
 
